@@ -292,8 +292,8 @@ export function QuizManagement({ user }: { user: any }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Test Yönetimi</h3>
-          <p className="text-sm text-slate-400">Testleri oluşturun, düzenleyin ve silin.</p>
+          <h3 className="text-lg font-semibold text-slate-900">Test Yönetimi</h3>
+          <p className="text-sm text-slate-500">Testleri oluşturun, düzenleyin ve silin.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -302,46 +302,46 @@ export function QuizManagement({ user }: { user: any }) {
               Yeni Test
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-slate-800/95 backdrop-blur-xl border-slate-700/50">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-white border border-slate-200">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-slate-900 font-semibold">
                 {editingQuiz ? 'Test Düzenle' : 'Yeni Test Oluştur'}
               </DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-slate-500">
                 Test bilgilerini girin ve soruları seçin.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <Alert variant="destructive" className="border-red-700/50 bg-red-900/20">
-                  <AlertDescription className="text-red-300">{error}</AlertDescription>
+                <Alert variant="destructive" className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-600">{error}</AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-slate-300">Test Başlığı *</Label>
+                  <Label htmlFor="title" className="text-slate-600">Test Başlığı *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="Test başlığını girin"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                    className="bg-white border-slate-200 text-slate-900 placeholder-slate-400"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-slate-300">Kategori *</Label>
+                  <Label htmlFor="category" className="text-slate-600">Kategori *</Label>
                   <Select
                     value={formData.categoryId}
                     onValueChange={(value) => handleInputChange('categoryId', value)}
                   >
-                    <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
                       <SelectValue placeholder="Kategori seçin" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-white border border-slate-200">
                       {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id} className="text-white hover:bg-slate-700">
+                        <SelectItem key={category.id} value={category.id} className="text-slate-700 hover:bg-blue-50">
                           {category.name}
                         </SelectItem>
                       ))}
@@ -351,19 +351,19 @@ export function QuizManagement({ user }: { user: any }) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-slate-300">Açıklama</Label>
+                <Label htmlFor="description" className="text-slate-600">Açıklama</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Test açıklamasını girin"
                   rows={3}
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                  className="bg-white border-slate-200 text-slate-900 placeholder-slate-400"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timeLimit" className="text-slate-300">Süre Limiti (dakika)</Label>
+                <Label htmlFor="timeLimit" className="text-slate-600">Süre Limiti (dakika)</Label>
                 <Input
                   id="timeLimit"
                   type="number"
@@ -371,21 +371,21 @@ export function QuizManagement({ user }: { user: any }) {
                   value={formData.timeLimit || ''}
                   onChange={(e) => handleInputChange('timeLimit', e.target.value ? parseInt(e.target.value) : undefined)}
                   placeholder="Örn: 30"
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                  className="bg-white border-slate-200 text-slate-900 placeholder-slate-400"
                 />
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-slate-300">Sorular</Label>
-                  <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-600/50">
+                  <Label className="text-slate-600">Sorular</Label>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100">
                     {selectedQuestions.length} soru seçildi
                   </Badge>
                 </div>
-                
-                <div className="border border-slate-700/50 rounded-lg p-4 max-h-64 overflow-y-auto space-y-3 bg-slate-800/30">
+
+                <div className="border border-slate-200 rounded-lg p-4 max-h-64 overflow-y-auto space-y-3 bg-slate-50">
                   {filteredQuestions.length === 0 ? (
-                    <p className="text-center text-slate-400 py-4">
+                    <p className="text-center text-slate-500 py-4">
                       {formData.categoryId ? 'Bu kategoride soru bulunmuyor' : 'Önce bir kategori seçin'}
                     </p>
                   ) : (
@@ -396,13 +396,13 @@ export function QuizManagement({ user }: { user: any }) {
                           onCheckedChange={(checked) => handleQuestionToggle(question.id, checked)}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{question.content}</p>
+                          <p className="text-sm font-medium text-slate-900 truncate">{question.content}</p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                            <Badge variant="outline" className="text-xs border-slate-200 text-slate-600">
                               {question.type === 'MULTIPLE_CHOICE' ? 'Çoktan Seçmeli' :
                                question.type === 'TRUE_FALSE' ? 'Doğru/Yanlış' : 'Kısa Cevap'}
                             </Badge>
-                            <Badge variant="secondary" className="text-xs bg-slate-600/20 text-slate-300 border-slate-600/50">
+                            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-100">
                               {question.category.name}
                             </Badge>
                           </div>
@@ -419,7 +419,7 @@ export function QuizManagement({ user }: { user: any }) {
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                   disabled={isLoading}
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  className="border-slate-200 text-slate-600 hover:bg-slate-100"
                 >
                   İptal
                 </Button>
@@ -434,42 +434,42 @@ export function QuizManagement({ user }: { user: any }) {
 
       {isLoading && !isDialogOpen ? (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500"></div>
         </div>
       ) : (
         <div className="grid gap-4">
           {quizzes.length === 0 ? (
-            <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
+            <Card className="bg-white border border-slate-200 shadow-sm">
               <CardContent className="text-center py-8">
                 <BookOpen className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2 text-white">Henüz test bulunmuyor</h3>
-                <p className="text-slate-400 mb-4">
+                <h3 className="text-lg font-medium mb-2 text-slate-900">Henüz test bulunmuyor</h3>
+                <p className="text-slate-500 mb-4">
                   İlk testi oluşturmak için "Yeni Test" butonuna tıklayın.
                 </p>
               </CardContent>
             </Card>
           ) : (
             quizzes.map((quiz) => (
-              <Card key={quiz.id} className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+              <Card key={quiz.id} className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
                         <div
-                          className="w-3 h-3 rounded-full ring-2 ring-white/20"
+                          className="w-3 h-3 rounded-full ring-2 ring-slate-100"
                           style={{ backgroundColor: quiz.category.color || '#3B82F6' }}
                         />
-                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-600/50">{quiz.category.name}</Badge>
+                        <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-100">{quiz.category.name}</Badge>
                         {quiz.timeLimit && (
-                          <Badge variant="outline" className="border-orange-600/50 text-orange-300">
+                          <Badge variant="outline" className="border-amber-200 text-amber-600">
                             <Clock className="h-3 w-3 mr-1" />
                             {quiz.timeLimit} dk
                           </Badge>
                         )}
                       </div>
-                      <CardTitle className="text-lg text-white">{quiz.title}</CardTitle>
+                      <CardTitle className="text-lg text-slate-900">{quiz.title}</CardTitle>
                       {quiz.description && (
-                        <CardDescription className="text-slate-400">{quiz.description}</CardDescription>
+                        <CardDescription className="text-slate-500">{quiz.description}</CardDescription>
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
@@ -477,7 +477,7 @@ export function QuizManagement({ user }: { user: any }) {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(quiz)}
-                        className="border-slate-600 text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 hover:border-blue-600/50 transition-all duration-200"
+                        className="border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all duration-200"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -486,7 +486,7 @@ export function QuizManagement({ user }: { user: any }) {
                         size="sm"
                         onClick={() => handleDelete(quiz.id)}
                         disabled={isLoading}
-                        className="border-slate-600 text-slate-300 hover:bg-red-600/20 hover:text-red-300 hover:border-red-600/50 transition-all duration-200"
+                        className="border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -494,14 +494,14 @@ export function QuizManagement({ user }: { user: any }) {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center space-x-6 text-sm text-slate-400">
-                    <div className="flex items-center space-x-1">
-                      <HelpCircle className="h-4 w-4 text-green-400" />
-                      <span>{quiz._count.questions} soru</span>
+                  <div className="flex items-center space-x-6 text-sm text-slate-600">
+                    <div className="flex items-center space-x-1 text-emerald-600">
+                      <HelpCircle className="h-4 w-4" />
+                      <span className="text-slate-600">{quiz._count.questions} soru</span>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <BookOpen className="h-4 w-4 text-blue-400" />
-                      <span>{quiz._count.attempts} çözüm</span>
+                    <div className="flex items-center space-x-1 text-blue-600">
+                      <BookOpen className="h-4 w-4" />
+                      <span className="text-slate-600">{quiz._count.attempts} çözüm</span>
                     </div>
                   </div>
                 </CardContent>

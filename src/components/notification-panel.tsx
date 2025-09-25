@@ -29,26 +29,26 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'RANK_CHANGE':
-        return <TrendingUp className="h-4 w-4 text-blue-400" />
+        return <TrendingUp className="h-4 w-4 text-blue-500" />
       case 'TEST_COMPLETED':
-        return <BookOpen className="h-4 w-4 text-green-400" />
+        return <BookOpen className="h-4 w-4 text-emerald-500" />
       case 'NEW_TEST':
-        return <BookOpen className="h-4 w-4 text-purple-400" />
+        return <BookOpen className="h-4 w-4 text-indigo-500" />
       default:
-        return <Bell className="h-4 w-4 text-gray-400" />
+        return <Bell className="h-4 w-4 text-slate-400" />
     }
   }
 
   const getNotificationColor = (type: string) => {
     switch (type) {
       case 'RANK_CHANGE':
-        return 'border-blue-500/30 bg-blue-500/10'
+        return 'border-blue-100 bg-blue-50'
       case 'TEST_COMPLETED':
-        return 'border-green-500/30 bg-green-500/10'
+        return 'border-emerald-100 bg-emerald-50'
       case 'NEW_TEST':
-        return 'border-purple-500/30 bg-purple-500/10'
+        return 'border-indigo-100 bg-indigo-50'
       default:
-        return 'border-gray-500/30 bg-gray-500/10'
+        return 'border-slate-200 bg-slate-50'
     }
   }
 
@@ -70,20 +70,20 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   return (
     <>
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+      <div
+        className="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[9998]"
         onClick={onClose}
       />
-      
+
       {/* Notification Panel */}
-      <div className="fixed top-4 right-4 w-96 max-h-[80vh] bg-slate-900 border border-white/20 rounded-xl shadow-2xl z-[9999] flex flex-col">
+      <div className="fixed top-4 right-4 w-96 max-h-[80vh] bg-white border border-slate-200 rounded-xl shadow-2xl z-[9999] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center space-x-2">
-            <Bell className="h-5 w-5 text-purple-400" />
-            <h2 className="text-lg font-semibold text-white">Bildirimler</h2>
+            <Bell className="h-5 w-5 text-blue-500" />
+            <h2 className="text-lg font-semibold text-slate-900">Bildirimler</h2>
             {unreadNotificationsCount > 0 && (
-              <Badge variant="secondary" className="bg-red-600 text-white text-xs">
+              <Badge variant="secondary" className="bg-red-100 text-red-600 text-xs border-red-200">
                 {unreadNotificationsCount}
               </Badge>
             )}
@@ -94,7 +94,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
                 variant="ghost"
                 size="sm"
                 onClick={markAllNotificationsAsRead}
-                className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
                 <CheckAll className="h-4 w-4" />
               </Button>
@@ -103,7 +103,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
               variant="ghost"
               size="sm"
               onClick={clearNotifications}
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               Temizle
             </Button>
@@ -111,7 +111,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-gray-400 hover:text-white hover:bg-white/10"
+              className="text-slate-500 hover:text-blue-600 hover:bg-blue-50"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -119,18 +119,18 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/10">
+        <div className="flex border-b border-slate-200">
           <button
             onClick={() => setActiveTab('notifications')}
             className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'notifications'
-                ? 'text-purple-400 border-b-2 border-purple-400'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-blue-600 border-b-2 border-blue-500'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             Bildirimler
             {unreadNotificationsCount > 0 && (
-              <Badge variant="secondary" className="ml-2 bg-red-600 text-white text-xs">
+              <Badge variant="secondary" className="ml-2 bg-red-100 text-red-600 text-xs border-red-200">
                 {unreadNotificationsCount}
               </Badge>
             )}
@@ -139,8 +139,8 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
             onClick={() => setActiveTab('live')}
             className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'live'
-                ? 'text-purple-400 border-b-2 border-purple-400'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-blue-600 border-b-2 border-blue-500'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             Canlı Güncellemeler
@@ -153,15 +153,15 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
             <div className="p-4 space-y-3">
               {notifications.length === 0 ? (
                 <div className="text-center py-8">
-                  <Bell className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">Henüz bildirim yok</p>
+                  <Bell className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                  <p className="text-slate-500">Henüz bildirim yok</p>
                 </div>
               ) : (
                 notifications.map((notification) => (
                   <Card
                     key={notification.id}
-                    className={`p-3 ${getNotificationColor(notification.type)} backdrop-blur-sm border ${
-                      !notification.read ? 'shadow-lg' : ''
+                    className={`p-3 ${getNotificationColor(notification.type)} border ${
+                      !notification.read ? 'shadow-md' : 'shadow-none'
                     }`}
                   >
                     <div className="flex items-start space-x-3">
@@ -170,14 +170,14 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className={`text-sm ${!notification.read ? 'text-white font-medium' : 'text-gray-300'}`}>
+                          <p className={`text-sm ${!notification.read ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>
                             {notification.message}
                           </p>
                           {!notification.read && (
-                            <div className="w-2 h-2 bg-purple-400 rounded-full flex-shrink-0" />
+                            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-slate-500 mt-1">
                           {formatTime(notification.timestamp)}
                         </p>
                       </div>
@@ -186,7 +186,7 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => markNotificationAsRead(notification.id)}
-                          className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 p-1 h-auto"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-auto"
                         >
                           <Check className="h-3 w-3" />
                         </Button>
@@ -200,24 +200,22 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
             <div className="p-4 space-y-3">
               {leaderboardUpdates.length === 0 ? (
                 <div className="text-center py-8">
-                  <Trophy className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">Henüz canlı güncelleme yok</p>
+                  <Trophy className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                  <p className="text-slate-500">Henüz canlı güncelleme yok</p>
                 </div>
               ) : (
                 leaderboardUpdates.map((update, index) => (
                   <Card
                     key={`${update.timestamp}_${index}`}
-                    className="p-3 border-purple-500/30 bg-purple-500/10 backdrop-blur-sm"
+                    className="p-3 border border-slate-200 bg-slate-50"
                   >
                     <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <Trophy className="h-4 w-4 text-purple-400" />
+                      <div className="flex-shrink-0 mt-0.5 h-8 w-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white">
+                        <Trophy className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium">
-                          {update.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-sm text-slate-900 font-medium">{update.message}</p>
+                        <p className="text-xs text-slate-500 mt-1">
                           {formatTime(update.timestamp)}
                         </p>
                       </div>
