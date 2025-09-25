@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?
+  role      Role     @default(STUDENT)
+  isActive  Boolean  @default(true)
+  avatar    String?  // Profile picture URL
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  quizAttempts QuizAttempt[]
+  answers       Answer[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  questions Question[]
+  quizzes   Quiz[]
+}
+
+model Question {
+  id          String      @id @default(cuid())
+  content     String
+  type        QuestionType @default(MULTIPLE_CHOICE)
+  options     String?     // JSON string of options
+  correctAnswer String    // Index of correct option or text answer
+  imageUrl    String?     // URL for question image
+  points      Int         @default(1)
+  difficulty  Difficulty  @default(MEDIUM)
+  categoryId  String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  quizQuestions QuizQuestion[]
+  answers     Answer[]
+}
+
+model Quiz {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  categoryId  String
+  timeLimit   Int?     // in minutes
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+}
+
+model QuizQuestion {
+  id         String @id @default(cuid())
+  quizId     String
+  questionId String
+  order      Int    // Order of question in quiz
+  createdAt  DateTime @default(now())
+
+  // Relations
+  quiz     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  userId       String
+  quizId       String
+  score        Int
+  maxScore     Int
+  percentage   Float
+  timeSpent    Int      // in seconds
+  completedAt  DateTime @default(now())
+  startedAt    DateTime
+
+  // Relations
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz   Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+model Answer {
+  id           String   @id @default(cuid())
+  userId       String
+  questionId   String
+  quizAttemptId String
+  answer       String   // Selected option index or text answer
+  isCorrect    Boolean
+  points       Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  quizAttempt QuizAttempt @relation(fields: [quizAttemptId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  TEXT
+  IMAGE
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
