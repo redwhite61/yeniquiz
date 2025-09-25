@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { LoginForm } from '@/components/auth/login-form'
 import { RegisterForm } from '@/components/auth/register-form'
 import { QuizTaking } from '@/components/quiz/quiz-taking'
@@ -11,6 +12,14 @@ import { useSocket } from '@/hooks/use-socket'
 import { NotificationPanel } from '@/components/notification-panel'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { MobileMenu } from '@/components/mobile-menu'
 import { 
   BookOpen, 
@@ -60,6 +69,7 @@ interface Quiz {
 }
 
 export default function Home() {
+  const router = useRouter()
   const [isLogin, setIsLogin] = useState(true)
   const [currentQuiz, setCurrentQuiz] = useState<any>(null)
   const [quizAttempt, setQuizAttempt] = useState<any>(null)
@@ -150,6 +160,10 @@ export default function Home() {
 
   const handleBackToCategories = () => {
     setSelectedCategory(null)
+  }
+
+  const handleNavigation = (path: string) => {
+    router.push(path)
   }
 
   const startQuiz = async (quizId: string) => {
@@ -370,64 +384,70 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="flex items-center space-x-3 bg-white border border-slate-200 rounded-full px-4 py-2 shadow-sm">
-                <div className="relative">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
-                  {user.avatar ? (
-                    <img
-                      src={`${user.avatar}?t=${Date.now()}`}
-                      alt="Profil resmi"
-                      className="w-9 h-9 rounded-full object-cover border border-slate-200"
-                      onError={(e) => {
-                        console.error('Avatar failed to load on homepage:', e.currentTarget.src)
-                        e.currentTarget.src = ''
-                        e.currentTarget.style.display = 'none'
-                      }}
-                      onLoad={(e) => {
-                        console.log('Avatar loaded successfully on homepage:', e.currentTarget.src)
-                      }}
-                    />
-                  ) : (
-                    <User className="h-5 w-5 text-slate-400" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                  >
+                    <span className="sr-only">Hesap seçeneklerini aç</span>
+                    <div className="relative">
+                      <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white"></div>
+                      {user.avatar ? (
+                        <img
+                          src={`${user.avatar}?t=${Date.now()}`}
+                          alt="Profil resmi"
+                          className="h-9 w-9 rounded-full border border-slate-200 object-cover"
+                          onError={(e) => {
+                            console.error('Avatar failed to load on homepage:', e.currentTarget.src)
+                            e.currentTarget.src = ''
+                            e.currentTarget.style.display = 'none'
+                          }}
+                          onLoad={(e) => {
+                            console.log('Avatar loaded successfully on homepage:', e.currentTarget.src)
+                          }}
+                        />
+                      ) : (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100">
+                          <User className="h-5 w-5 text-slate-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="font-semibold text-slate-900">
+                        {user.name || user.email}
+                      </span>
+                      <Badge variant="secondary" className="mt-0.5 w-fit border-blue-100 bg-blue-50 text-xs text-blue-700">
+                        {user.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
+                      </Badge>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 p-1">
+                  <DropdownMenuLabel>Hızlı Erişim</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {user.role === 'ADMIN' && (
+                    <DropdownMenuItem onSelect={() => handleNavigation('/admin')}>
+                      <Settings className="h-4 w-4 text-slate-500" />
+                      Admin Panel
+                    </DropdownMenuItem>
                   )}
-                </div>
-                <div className="text-sm">
-                  <span className="font-medium text-slate-900">{user.name || user.email}</span>
-                  <Badge variant="secondary" className="ml-2 text-xs bg-blue-50 text-blue-700 border-blue-100">
-                    {user.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
-                  </Badge>
-                </div>
-              </div>
-              {user.role === 'ADMIN' && (
-                <button
-                  onClick={() => window.location.href = '/admin'}
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 border border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50 px-4 py-2"
-                >
-                  <Settings className="h-4 w-4" />
-                  <span className="hidden lg:inline">Admin Panel</span>
-                </button>
-              )}
-              <button
-                onClick={() => window.location.href = '/leaderboard'}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 border border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50 px-4 py-2"
-              >
-                <Trophy className="h-4 w-4" />
-                <span className="hidden lg:inline">Liderlik</span>
-              </button>
-              <button
-                onClick={() => window.location.href = '/profile'}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 border border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50 px-4 py-2"
-              >
-                <User className="h-4 w-4" />
-                <span className="hidden lg:inline">Profil</span>
-              </button>
-              <button
-                onClick={logout}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden lg:inline">Çıkış</span>
-              </button>
+                  <DropdownMenuItem onSelect={() => handleNavigation('/leaderboard')}>
+                    <Trophy className="h-4 w-4 text-slate-500" />
+                    Liderlik
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => handleNavigation('/profile')}>
+                    <User className="h-4 w-4 text-slate-500" />
+                    Profil
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onSelect={() => logout()}>
+                    <LogOut className="h-4 w-4" />
+                    Çıkış
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Mobile Menu */}
