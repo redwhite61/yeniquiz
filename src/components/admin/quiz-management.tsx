@@ -27,8 +27,9 @@ import {
 interface Category {
   id: string
   name: string
-  description?: string
-  color?: string
+  description?: string | null
+  color?: string | null
+  image?: string | null
 }
 
 interface Question {

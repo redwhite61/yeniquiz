@@ -12,6 +12,7 @@ import { useSocket } from '@/hooks/use-socket'
 import { NotificationPanel } from '@/components/notification-panel'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import CategoryCard from '@/components/category-card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,8 +48,9 @@ import {
 interface Category {
   id: string
   name: string
-  description?: string
-  color?: string
+  description?: string | null
+  color?: string | null
+  image?: string | null
   _count: {
     quizzes: number
     questions: number
@@ -802,41 +804,13 @@ export default function Home() {
           </div>
 
           {!selectedCategory ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredCategories.map((category) => (
-                <Card
+                <CategoryCard
                   key={category.id}
-                  className="group cursor-pointer bg-white border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-                  onClick={() => handleCategorySelect(category.id)}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-3 h-3 rounded-full ring-2 ring-slate-100"
-                          style={{ backgroundColor: category.color || '#8B5CF6' }}
-                        />
-                        <CardTitle className="text-slate-900 group-hover:text-blue-600 transition-colors">
-                          {category.name}
-                        </CardTitle>
-                      </div>
-                      <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100">
-                        {category._count.quizzes} test
-                      </Badge>
-                    </div>
-                    {category.description && (
-                      <CardDescription className="text-slate-500">
-                        {category.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-slate-500">
-                      <span>{category._count.questions} soru</span>
-                      <span className="group-hover:text-blue-600 transition-colors">Testleri gör →</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                  category={category}
+                  onView={() => handleCategorySelect(category.id)}
+                />
               ))}
             </div>
           ) : (

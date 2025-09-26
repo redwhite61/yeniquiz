@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,8 +23,9 @@ import {
 interface Category {
   id: string
   name: string
-  description?: string
-  color?: string
+  description?: string | null
+  color?: string | null
+  image?: string | null
   _count: {
     quizzes: number
     questions: number
@@ -41,10 +42,53 @@ function CategoryForm({ category, onSuccess }: CategoryFormProps) {
   const [formData, setFormData] = useState({
     name: category?.name || '',
     description: category?.description || '',
-    color: category?.color || '#3B82F6'
+    color: category?.color || '#3B82F6',
+    image: category?.image || ''
   })
+  const [imagePreview, setImagePreview] = useState<string | null>(category?.image ?? null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        name: category?.name || '',
+        description: category?.description || '',
+        color: category?.color || '#3B82F6',
+        image: category?.image || ''
+      })
+      setImagePreview(category?.image ?? null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }, [category, isOpen])
+
+  const handleClearImage = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setImagePreview(null)
+    setFormData((prev) => ({ ...prev, image: '' }))
+  }
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      handleClearImage()
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      setFormData((prev) => ({ ...prev, image: result }))
+      setImagePreview(result || null)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,13 +104,20 @@ function CategoryForm({ category, onSuccess }: CategoryFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          image: formData.image || null
+        }),
       })
 
       if (response.ok) {
         onSuccess()
         setIsOpen(false)
-        setFormData({ name: '', description: '', color: '#3B82F6' })
+        setFormData({ name: '', description: '', color: '#3B82F6', image: '' })
+        setImagePreview(null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Kategori kaydedilirken bir hata oluştu')
@@ -144,6 +195,44 @@ function CategoryForm({ category, onSuccess }: CategoryFormProps) {
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                 className="col-span-3 h-10"
               />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="image" className="text-right pt-2">
+                Görsel
+              </Label>
+              <div className="col-span-3 space-y-3">
+                <Input
+                  ref={fileInputRef}
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="bg-white file:mr-3 file:rounded-md file:border file:border-slate-200 file:bg-slate-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-600 hover:file:bg-slate-100"
+                />
+                {imagePreview ? (
+                  <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                    <img
+                      src={imagePreview}
+                      alt="Kategori önizlemesi"
+                      className="h-32 w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/10" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearImage}
+                      className="absolute top-2 right-2 bg-white/80 text-slate-600 hover:bg-white"
+                    >
+                      Görseli Kaldır
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500">
+                    Görsel seçerek kategorinizi öne çıkarabilirsiniz.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -283,7 +372,7 @@ export function CategoryManagement({ user }: CategoryManagementProps) {
             >
               <div
                 className="absolute inset-x-0 top-0 h-1"
-                style={{ background: `linear-gradient(90deg, ${category.color} 0%, rgba(15,23,42,0.08) 100%)` }}
+                style={{ background: `linear-gradient(90deg, ${category.color || '#3B82F6'} 0%, rgba(15,23,42,0.08) 100%)` }}
               />
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="space-y-1">
@@ -320,8 +409,11 @@ export function CategoryManagement({ user }: CategoryManagementProps) {
                 <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500">
                   <span className="font-medium text-slate-600">Görsel Temsil:</span>{' '}
                   <span className="inline-flex items-center gap-2">
-                    <span className="inline-block h-4 w-4 rounded-full border border-slate-200" style={{ backgroundColor: category.color }} />
-                    {category.color}
+                    <span
+                      className="inline-block h-4 w-4 rounded-full border border-slate-200"
+                      style={{ backgroundColor: category.color || '#3B82F6' }}
+                    />
+                    {category.color || '#3B82F6'}
                   </span>
                 </div>
               </CardContent>

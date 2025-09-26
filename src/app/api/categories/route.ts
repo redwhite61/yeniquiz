@@ -29,7 +29,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, description, color } = await request.json()
+    const { name, description, color, image } = await request.json()
 
     if (!name) {
       return NextResponse.json(
@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description,
-        color: color || '#3B82F6'
+        color: color || '#3B82F6',
+        image: image || null
       }
     })
 
