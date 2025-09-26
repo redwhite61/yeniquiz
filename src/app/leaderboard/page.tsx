@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { MobileMenu } from '@/components/mobile-menu'
-import { Trophy, Medal, Award, User, ArrowLeft, Crown, Star, Zap, Menu, Search } from 'lucide-react'
+import { Trophy, Medal, Award, User, ArrowLeft, Crown, Star, Zap, Menu } from 'lucide-react'
 
 interface UserScore {
   id: string
@@ -21,14 +21,41 @@ interface UserScore {
   rank: number
 }
 
+const rankBadgeStyles: Record<number, string> = {
+  1: 'bg-amber-100 text-amber-700 border-amber-200',
+  2: 'bg-slate-100 text-slate-700 border-slate-200',
+  3: 'bg-orange-100 text-orange-700 border-orange-200'
+}
+
+const getRankBadgeColor = (rank: number) => rankBadgeStyles[rank] ?? 'bg-blue-100 text-blue-700 border-blue-200'
+
+const getScoreColor = (percentage: number) => {
+  if (percentage >= 90) return 'text-emerald-600'
+  if (percentage >= 70) return 'text-blue-600'
+  if (percentage >= 50) return 'text-amber-600'
+  return 'text-rose-600'
+}
+
+const getRankIcon = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return <Crown className="h-7 w-7 text-amber-500" />
+    case 2:
+      return <Medal className="h-6 w-6 text-slate-400" />
+    case 3:
+      return <Award className="h-6 w-6 text-orange-500" />
+    default:
+      return <span className="text-base font-semibold text-slate-500">#{rank}</span>
+  }
+}
+
 export default function LeaderboardPage() {
   const { user, isLoading: authLoading } = useAuth()
-  const { isConnected, requestLeaderboardUpdate } = useSocket()
+  const { isConnected } = useSocket()
   const [userScores, setUserScores] = useState<UserScore[]>([])
   const [currentUserRank, setCurrentUserRank] = useState<UserScore | null>(null)
   const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   const fetchLeaderboard = async () => {
     try {
@@ -53,15 +80,12 @@ export default function LeaderboardPage() {
     }
   }, [authLoading, user])
 
-  // Listen for real-time leaderboard updates
   useEffect(() => {
     const handleRefreshLeaderboard = () => {
-      console.log('Refreshing leaderboard due to real-time update')
       fetchLeaderboard()
     }
 
     window.addEventListener('refreshLeaderboard', handleRefreshLeaderboard)
-    
     return () => {
       window.removeEventListener('refreshLeaderboard', handleRefreshLeaderboard)
     }
@@ -69,77 +93,27 @@ export default function LeaderboardPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500"></div>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-16 w-16 animate-spin rounded-full border-4 border-slate-200 border-t-blue-500"></div>
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border-white/20">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+        <Card className="w-full max-w-md border border-slate-200 bg-white shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-red-400">Erişim Engellendi</CardTitle>
-            <CardDescription className="text-purple-300">
+            <CardTitle className="text-2xl font-semibold text-slate-900">Erişim Engellendi</CardTitle>
+            <CardDescription className="text-slate-500">
               Liderlik tablosunu görüntülemek için giriş yapmalısınız.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => window.location.href = '/'} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">
-              Giriş Yap
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Crown className="h-8 w-8 text-yellow-400" />
-      case 2:
-        return <Medal className="h-6 w-6 text-gray-300" />
-      case 3:
-        return <Award className="h-6 w-6 text-amber-500" />
-      default:
-        return <span className="text-lg font-bold text-purple-300">#{rank}</span>
-    }
-  }
-
-  const getRankBadgeColor = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-yellow-400'
-      case 2:
-        return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-400'
-      case 3:
-        return 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-400'
-      default:
-        return 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-400'
-    }
-  }
-
-  const getScoreColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-400'
-    if (percentage >= 70) return 'text-blue-400'
-    if (percentage >= 50) return 'text-yellow-400'
-    return 'text-red-400'
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border-white/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-red-400">Erişim Engellendi</CardTitle>
-            <CardDescription className="text-purple-300">
-              Liderlik tablosunu görüntülemek için giriş yapmalısınız.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => window.location.href = '/'} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">
+            <Button
+              onClick={() => (window.location.href = '/')}
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            >
               Giriş Yap
             </Button>
           </CardContent>
@@ -149,183 +123,172 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Mobile Menu Component */}
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
 
-      {/* Header */}
-      <header className="bg-black/30 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <button onClick={() => window.location.href = '/'} className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-green-500/30 text-green-400 hover:bg-green-500/10 hover:border-green-500/50 transition-all duration-200 bg-green-500/5 px-4 py-2">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Ana Sayfa
-              </button>
-              <div className="flex items-center">
-                <Trophy className="h-8 w-8 text-yellow-400 mr-2" />
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Liderlik Tablosu</h1>
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/70">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => (window.location.href = '/')}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-blue-200 hover:text-blue-700 hover:shadow-sm"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Ana Sayfa
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-rose-400 text-white shadow-inner">
+                <Trophy className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-semibold text-slate-900">Liderlik Tablosu</h1>
                   {isConnected && (
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-green-400 font-medium">Canlı</span>
-                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                      Canlı
+                    </span>
                   )}
                 </div>
+                <p className="text-sm text-slate-500">En başarılı öğrencileri ve sıralamanızı takip edin.</p>
               </div>
             </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-2">
-              <User className="h-5 w-5 text-purple-300" />
-              <span className="text-purple-200">{user.name || user.email}</span>
-              <Badge variant="secondary" className="bg-purple-600 text-white border-purple-500">
+          </div>
+
+          <div className="hidden md:flex items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm">
+              <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
+              <span className="text-sm font-medium text-slate-700">{user.name || user.email}</span>
+              <Badge variant="secondary" className="border-blue-100 bg-blue-50 text-blue-700">
                 {user.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
               </Badge>
             </div>
+          </div>
 
-            {/* Mobile Menu */}
-            <div className="md:hidden flex items-center space-x-2">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 size-9 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 text-white hover:bg-white/10"
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-blue-200 hover:text-blue-700"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <h2 className="text-5xl font-bold text-white mb-4">En İyi Performanslar</h2>
-          <p className="text-xl text-purple-300 max-w-2xl mx-auto">
-            En başarılı öğrencileri ve kendi sıralamanızı görün
+          <h2 className="mb-4 text-4xl font-semibold text-slate-900">En İyi Performanslar</h2>
+          <p className="mx-auto max-w-2xl text-lg text-slate-500">
+            En başarılı öğrencileri ve kendi sıralamanızı görün.
           </p>
         </div>
 
-        {/* Current User Rank */}
         {currentUserRank && (
-          <Card className="mb-12 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-xl border-2 border-purple-500/30">
+          <Card className="mb-12 border border-slate-200 bg-white shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-white">
-                <span className="flex items-center space-x-2">
+              <CardTitle className="flex items-center justify-between text-slate-900">
+                <span className="flex items-center gap-2">
                   <User className="h-5 w-5" />
                   Sizin Sıralamanız
                 </span>
-                <Badge className={getRankBadgeColor(currentUserRank.rank)}>
-                  {getRankIcon(currentUserRank.rank)}
-                </Badge>
+                <Badge className={`${getRankBadgeColor(currentUserRank.rank)} border`}>{getRankIcon(currentUserRank.rank)}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                    #{currentUserRank.rank}
-                  </div>
-                  <div className="text-sm text-purple-300">Sıralama</div>
+                  <div className="text-3xl font-semibold text-slate-900">#{currentUserRank.rank}</div>
+                  <div className="text-sm text-slate-500">Sıralama</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    {currentUserRank.totalScore}
-                  </div>
-                  <div className="text-sm text-purple-300">Toplam Puan</div>
+                  <div className="text-3xl font-semibold text-slate-900">{currentUserRank.totalScore}</div>
+                  <div className="text-sm text-slate-500">Toplam Puan</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    {currentUserRank.totalQuizzes}
-                  </div>
-                  <div className="text-sm text-purple-300">Test Sayısı</div>
+                  <div className="text-3xl font-semibold text-slate-900">{currentUserRank.totalQuizzes}</div>
+                  <div className="text-sm text-slate-500">Test Sayısı</div>
                 </div>
                 <div className="text-center">
-                  <div className={`text-3xl font-bold ${getScoreColor(currentUserRank.averagePercentage)}`}>
+                  <div className={`text-3xl font-semibold ${getScoreColor(currentUserRank.averagePercentage)}`}>
                     {currentUserRank.averagePercentage.toFixed(1)}%
                   </div>
-                  <div className="text-sm text-purple-300">Başarı Oranı</div>
+                  <div className="text-sm text-slate-500">Başarı Oranı</div>
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Top 3 Users Podium */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="mb-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
           {userScores.slice(0, 3).map((userScore, index) => (
-            <Card 
-              key={userScore.id} 
-              className={`text-center backdrop-blur-xl border-2 transform transition-all duration-300 hover:scale-105 ${
-                index === 0 
-                  ? 'bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 border-yellow-500/30 shadow-2xl shadow-yellow-500/20' 
-                  : index === 1 
-                  ? 'bg-gradient-to-br from-gray-500/20 to-gray-600/20 border-gray-500/30 shadow-xl shadow-gray-500/20' 
-                  : 'bg-gradient-to-br from-amber-500/20 to-amber-600/20 border-amber-500/30 shadow-lg shadow-amber-500/20'
+            <Card
+              key={userScore.id}
+              className={`transform border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
+                index === 0
+                  ? 'border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50'
+                  : index === 1
+                  ? 'border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100'
+                  : 'border-orange-200 bg-gradient-to-br from-amber-50 to-rose-50'
               }`}
             >
               <CardHeader className="pb-4">
-                <div className="flex justify-center mb-4">
-                  {getRankIcon(index + 1)}
-                </div>
-                
-                {/* Profile Picture */}
-                <div className="flex justify-center mb-4">
+                <div className="mb-4 flex justify-center">{getRankIcon(index + 1)}</div>
+                <div className="mb-4 flex justify-center">
                   <div className="relative">
-                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/20 bg-white/10 backdrop-blur-sm">
+                    <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white/60 bg-white shadow-inner">
                       {userScore.avatar ? (
-                        <img 
-                          src={`${userScore.avatar}?t=${Date.now()}`} 
+                        <img
+                          src={`${userScore.avatar}?t=${Date.now()}`}
                           alt={userScore.name || userScore.email}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                           onError={(e) => {
                             e.currentTarget.src = ''
                             e.currentTarget.style.display = 'none'
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-                          <User className="w-8 h-8 text-purple-400" />
+                        <div className="flex h-full w-full items-center justify-center bg-slate-200">
+                          <User className="h-8 w-8 text-slate-500" />
                         </div>
                       )}
                     </div>
-                    {/* Rank Badge */}
-                    <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
-                      index === 0 
-                        ? 'bg-yellow-500 border-yellow-300 text-white' 
-                        : index === 1 
-                        ? 'bg-gray-500 border-gray-300 text-white' 
-                        : 'bg-amber-500 border-amber-300 text-white'
-                    }`}>
+                    <div
+                      className={`absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 bg-white text-xs font-bold text-slate-700 ${
+                        index === 0
+                          ? 'border-amber-300'
+                          : index === 1
+                          ? 'border-slate-300'
+                          : 'border-orange-300'
+                      }`}
+                    >
                       {index + 1}
                     </div>
                   </div>
                 </div>
-                
-                <CardTitle className={`text-xl ${index === 0 ? 'text-yellow-300' : index === 1 ? 'text-gray-300' : 'text-amber-300'}`}>
+                <CardTitle className="text-center text-xl font-semibold text-slate-900">
                   {userScore.name || userScore.email}
                 </CardTitle>
-                <CardDescription className="text-purple-300 font-medium">
+                <CardDescription className="text-center text-slate-500">
                   {userScore.totalQuizzes} test çözüldü
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-center space-x-2">
-                    <Star className="h-5 w-5 text-yellow-400" />
-                    <div className="text-3xl font-bold text-white">{userScore.totalScore}</div>
+                <div className="space-y-4 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500" />
+                    <div className="text-3xl font-semibold text-slate-900">{userScore.totalScore}</div>
                   </div>
                   <div>
                     <div className={`text-lg font-semibold ${getScoreColor(userScore.averagePercentage)}`}>
                       {userScore.averagePercentage.toFixed(1)}%
                     </div>
-                    <div className="text-sm text-purple-300">Ortalama Başarı</div>
+                    <div className="text-sm text-slate-500">Ortalama Başarı</div>
                   </div>
                   {index === 0 && (
-                    <div className="flex items-center justify-center space-x-1">
-                      <Zap className="h-4 w-4 text-yellow-400" />
-                      <span className="text-xs text-yellow-400 font-medium">Şampiyon</span>
+                    <div className="flex items-center justify-center gap-1 text-amber-600">
+                      <Zap className="h-4 w-4" />
+                      <span className="text-xs font-medium">Şampiyon</span>
                     </div>
                   )}
                 </div>
@@ -334,76 +297,70 @@ export default function LeaderboardPage() {
           ))}
         </div>
 
-        {/* Full Leaderboard */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20">
+        <Card className="border border-slate-200 bg-white shadow-sm">
           <CardHeader>
-            <CardTitle className="text-white flex items-center space-x-2">
+            <CardTitle className="flex items-center gap-2 text-slate-900">
               <Trophy className="h-5 w-5" />
               Tüm Sıralama
             </CardTitle>
-            <CardDescription className="text-purple-300">
+            <CardDescription className="text-slate-500">
               Tüm kullanıcıların performans sıralaması
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+              <div className="flex h-32 items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
               </div>
             ) : (
               <div className="space-y-3">
                 {userScores.map((userScore, index) => (
                   <div
                     key={userScore.id}
-                    className={`flex items-center justify-between p-4 rounded-xl backdrop-blur-sm transition-all duration-300 ${
-                      userScore.id === user?.id 
-                        ? 'bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-500/50 shadow-lg' 
-                        : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                    className={`flex items-center justify-between rounded-xl border p-4 transition-all duration-200 ${
+                      userScore.id === user.id
+                        ? 'border-blue-200 bg-blue-50 shadow-sm'
+                        : 'border-slate-200 bg-white hover:border-blue-200 hover:shadow-sm'
                     }`}
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center justify-center w-12 h-12">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center">
                         {getRankIcon(index + 1)}
                       </div>
-                      
-                      {/* Profile Picture */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
+                      <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 bg-slate-100">
                         {userScore.avatar ? (
-                          <img 
-                            src={`${userScore.avatar}?t=${Date.now()}`} 
+                          <img
+                            src={`${userScore.avatar}?t=${Date.now()}`}
                             alt={userScore.name || userScore.email}
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                             onError={(e) => {
                               e.currentTarget.src = ''
                               e.currentTarget.style.display = 'none'
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-                            <User className="w-4 h-4 text-purple-400" />
+                          <div className="flex h-full w-full items-center justify-center bg-slate-200">
+                            <User className="h-4 w-4 text-slate-500" />
                           </div>
                         )}
                       </div>
-                      
                       <div>
-                        <div className="font-medium text-white">
+                        <div className="font-medium text-slate-900">
                           {userScore.name || userScore.email}
-                          {userScore.id === user?.id && (
-                            <Badge variant="secondary" className="ml-2 bg-purple-600 text-white border-purple-500 text-xs">
+                          {userScore.id === user.id && (
+                            <Badge variant="secondary" className="ml-2 border-blue-200 bg-blue-50 text-xs text-blue-700">
                               Siz
                             </Badge>
                           )}
                         </div>
-                        <div className="text-sm text-purple-300">
+                        <div className="text-sm text-slate-500">
                           {userScore.totalQuizzes} test çözüldü • {userScore.averagePercentage.toFixed(1)}% ortalama
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-xl text-white">{userScore.totalScore} puan</div>
-                      <div className="text-sm text-purple-300">
-                        En iyi: {userScore.bestScore} puan
-                      </div>
+                      <div className="text-xl font-semibold text-slate-900">{userScore.totalScore} puan</div>
+                      <div className="text-sm text-slate-500">En iyi: {userScore.bestScore} puan</div>
                     </div>
                   </div>
                 ))}
@@ -413,14 +370,9 @@ export default function LeaderboardPage() {
         </Card>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-black/30 backdrop-blur-xl border-t border-white/10 py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-purple-300">
-              © 2024 QuizMaster. Tüm hakları saklıdır.
-            </p>
-          </div>
+      <footer className="mt-16 border-t border-slate-200 bg-white py-8">
+        <div className="mx-auto max-w-7xl px-4 text-center text-slate-500 sm:px-6 lg:px-8">
+          © 2024 QuizMaster. Tüm hakları saklıdır.
         </div>
       </footer>
     </div>

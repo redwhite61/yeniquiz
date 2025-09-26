@@ -518,10 +518,10 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'EASY': return 'bg-green-600/20 text-green-300 border-green-600/50'
-      case 'MEDIUM': return 'bg-yellow-600/20 text-yellow-300 border-yellow-600/50'
-      case 'HARD': return 'bg-red-600/20 text-red-300 border-red-600/50'
-      default: return 'bg-slate-600/20 text-slate-300 border-slate-600/50'
+      case 'EASY': return 'bg-emerald-50 text-emerald-700 border-emerald-100'
+      case 'MEDIUM': return 'bg-amber-50 text-amber-700 border-amber-100'
+      case 'HARD': return 'bg-rose-50 text-rose-700 border-rose-100'
+      default: return 'bg-slate-100 text-slate-600 border-slate-200'
     }
   }
 
@@ -539,30 +539,30 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Soru Yönetimi</h3>
-          <p className="text-sm text-slate-400">Test sorularını yönetin</p>
+          <h3 className="text-lg font-semibold text-slate-900">Soru Yönetimi</h3>
+          <p className="text-sm text-slate-500">Test sorularını yönetin</p>
         </div>
         <QuestionForm categories={categories} onSuccess={fetchData} />
       </div>
 
       {error && (
-        <div className="p-4 bg-red-900/20 border border-red-700/50 rounded-md backdrop-blur-sm">
-          <p className="text-sm text-red-300">{error}</p>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
       {isLoading ? (
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500"></div>
         </div>
       ) : (
         <div className="grid gap-4">
           {questions.map((question) => (
-            <Card key={question.id} className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+            <Card key={question.id} className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex-1">
-                  <CardTitle className="text-lg text-white">{question.content}</CardTitle>
-                  <CardDescription className="mt-1 text-slate-400">
+                  <CardTitle className="text-lg text-slate-900">{question.content}</CardTitle>
+                  <CardDescription className="mt-1 text-slate-500">
                     {question.category.name} • {getTypeLabel(question.type)}
                   </CardDescription>
                 </div>
@@ -576,7 +576,7 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteQuestion(question.id)}
-                    className="border-slate-600 text-slate-300 hover:bg-red-600/20 hover:text-red-300 hover:border-red-600/50 transition-all duration-200"
+                    className="border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -586,10 +586,10 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                 <div className="space-y-3">
                   {question.imageUrl && (
                     <div className="flex justify-center">
-                      <img 
-                        src={question.imageUrl} 
-                        alt="Soru resmi" 
-                        className="max-w-full h-auto max-h-32 rounded-md border border-slate-600"
+                      <img
+                        src={question.imageUrl}
+                        alt="Soru resmi"
+                        className="max-w-full h-auto max-h-32 rounded-md border border-slate-200"
                         onError={(e) => {
                           e.currentTarget.src = '';
                           e.currentTarget.style.display = 'none';
@@ -599,15 +599,15 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                   )}
                   {question.type !== 'TEXT' && question.type !== 'IMAGE' && question.options.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium mb-2 text-slate-300">Seçenekler:</p>
+                      <p className="text-sm font-medium mb-2 text-slate-600">Seçenekler:</p>
                       <div className="grid grid-cols-1 gap-2">
                         {question.options.map((option, index) => (
                           <div
                             key={index}
                             className={`flex items-center space-x-3 p-2 rounded text-sm ${
                               index.toString() === question.correctAnswer
-                                ? 'bg-green-600/20 text-green-300 border border-green-600/50'
-                                : 'bg-slate-700/50 text-slate-300 border border-slate-600/50'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                                : 'bg-slate-100 text-slate-600 border border-slate-200'
                             }`}
                           >
                             <span className="font-medium min-w-[20px]">
@@ -615,10 +615,10 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                             </span>
                             <span className="flex-1">{option.text}</span>
                             {option.imageUrl && (
-                              <img 
-                                src={option.imageUrl} 
+                              <img
+                                src={option.imageUrl}
                                 alt={`Seçenek ${index + 1}`}
-                                className="h-8 w-8 rounded object-cover border border-slate-500"
+                                className="h-8 w-8 rounded object-cover border border-slate-200"
                                 onError={(e) => {
                                   e.currentTarget.src = '';
                                   e.currentTarget.style.display = 'none';
@@ -633,8 +633,8 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                   
                   {question.type === 'TEXT' && (
                     <div>
-                      <p className="text-sm font-medium mb-1 text-slate-300">Doğru Cevap:</p>
-                      <p className="text-sm bg-green-600/20 text-green-300 p-2 rounded border border-green-600/50">
+                      <p className="text-sm font-medium mb-1 text-slate-600">Doğru Cevap:</p>
+                      <p className="text-sm bg-emerald-50 text-emerald-700 p-2 rounded border border-emerald-100">
                         {question.correctAnswer}
                       </p>
                     </div>
@@ -642,10 +642,10 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
 
                   <div className="flex items-center space-x-4">
                     <Badge className={getDifficultyColor(question.difficulty)}>
-                      {question.difficulty === 'EASY' ? 'Kolay' : 
+                      {question.difficulty === 'EASY' ? 'Kolay' :
                        question.difficulty === 'MEDIUM' ? 'Orta' : 'Zor'}
                     </Badge>
-                    <Badge variant="secondary" className="bg-slate-600/20 text-slate-300 border-slate-600/50">
+                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-slate-200">
                       {question.points} Puan
                     </Badge>
                   </div>

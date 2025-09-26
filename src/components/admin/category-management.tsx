@@ -210,33 +210,33 @@ export function CategoryManagement({ user }: CategoryManagementProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Kategori Yönetimi</h3>
-          <p className="text-sm text-slate-400">Test kategorilerini yönetin</p>
+          <h3 className="text-lg font-semibold text-slate-900">Kategori Yönetimi</h3>
+          <p className="text-sm text-slate-500">Test kategorilerini yönetin</p>
         </div>
         <CategoryForm onSuccess={fetchCategories} />
       </div>
 
       {error && (
-        <div className="p-4 bg-red-900/20 border border-red-700/50 rounded-md backdrop-blur-sm">
-          <p className="text-sm text-red-300">{error}</p>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
       {isLoading ? (
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500"></div>
         </div>
       ) : (
         <div className="grid gap-4">
           {categories.map((category) => (
-            <Card key={category.id} className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+            <Card key={category.id} className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <div className="flex items-center space-x-3">
                   <div
-                    className="w-4 h-4 rounded-full ring-2 ring-white/20"
+                    className="w-3 h-3 rounded-full ring-2 ring-slate-100"
                     style={{ backgroundColor: category.color }}
                   />
-                  <CardTitle className="text-lg text-white">{category.name}</CardTitle>
+                  <CardTitle className="text-lg text-slate-900">{category.name}</CardTitle>
                 </div>
                 <div className="flex items-center space-x-2">
                   <CategoryForm
@@ -247,21 +247,21 @@ export function CategoryManagement({ user }: CategoryManagementProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeleteCategory(category.id)}
-                    className="border-slate-600 text-slate-300 hover:bg-red-600/20 hover:text-red-300 hover:border-red-600/50 transition-all duration-200"
+                    className="border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <CardDescription className="mb-4 text-slate-400">
+                <CardDescription className="mb-4 text-slate-500">
                   {category.description || 'Açıklama bulunmuyor'}
                 </CardDescription>
                 <div className="flex items-center space-x-4">
-                  <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-600/50">
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100">
                     {category._count.quizzes} Test
                   </Badge>
-                  <Badge variant="secondary" className="bg-green-600/20 text-green-300 border-green-600/50">
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-100">
                     {category._count.questions} Soru
                   </Badge>
                 </div>
