@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Clock, ChevronLeft, ChevronRight, Flag, ZoomIn } from 'lucide-react'
 import { normalizeImageUrl, getFallbackImageUrl } from '@/lib/image-utils'
 import { ImageModal } from '@/components/ui/image-modal'
+import { toast } from '@/hooks/use-toast'
 
 interface Question {
   id: string
@@ -145,6 +146,19 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
     onComplete(answers, timeSpent)
   }
 
+  const isQuestionAnswered = (question: Quiz['questions'][number]) => {
+    const answer = answers[question.id]
+
+    if (question.type === 'TEXT') {
+      return Boolean(answer && answer.trim().length > 0)
+    }
+
+    return answer !== undefined && answer !== ''
+  }
+
+  const getAnsweredCount = () =>
+    quiz.questions.reduce((count, question) => (isQuestionAnswered(question) ? count + 1 : count), 0)
+
   const handleImageClick = (imageUrl: string, alt: string = 'Resim') => {
     setSelectedImageUrl(imageUrl)
     setSelectedImageAlt(alt)
@@ -157,13 +171,37 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
     setSelectedImageAlt('')
   }
 
+  const handleManualSubmit = () => {
+    const answeredCount = getAnsweredCount()
+
+    if (answeredCount < quiz.questions.length) {
+      const firstUnansweredIndex = quiz.questions.findIndex((question) => !isQuestionAnswered(question))
+
+      toast({
+        title: 'Eksik sorular var',
+        description: `${quiz.questions.length - answeredCount} soruya daha cevap vermelisiniz.`,
+        variant: 'destructive'
+      })
+
+      if (firstUnansweredIndex !== -1) {
+        setCurrentQuestionIndex(firstUnansweredIndex)
+      }
+
+      return
+    }
+
+    handleSubmit()
+  }
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
   }
 
-  const getAnsweredCount = () => Object.keys(answers).length
+  const answeredCount = getAnsweredCount()
+  const totalQuestions = quiz.questions.length
+  const allQuestionsAnswered = answeredCount === totalQuestions
 
   const difficultyBadge = getDifficultyBadge(currentQuestion.difficulty)
 
@@ -213,8 +251,8 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                   <span className="text-slate-400">/ {quiz.questions.length}</span>
                   <span className="hidden sm:inline text-slate-300">•</span>
                   <span className="font-medium text-slate-900">Cevaplanan:</span>
-                  <span className="text-blue-600">{getAnsweredCount()}</span>
-                  <span className="text-slate-400">/ {quiz.questions.length}</span>
+                  <span className="text-blue-600">{answeredCount}</span>
+                  <span className="text-slate-400">/ {totalQuestions}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <span>İlerleme</span>
@@ -416,7 +454,7 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                 Önceki Soru
               </Button>
               <div className="order-3 flex items-center gap-2 text-sm text-slate-500 sm:order-2">
-                <span>{getAnsweredCount()} cevaplandı</span>
+                <span>{answeredCount} cevaplandı</span>
                 <span>•</span>
                 <span>{flaggedQuestions.size} işaretlendi</span>
               </div>
@@ -430,14 +468,24 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => handleSubmit()}
-                  className="order-2 sm:order-3 inline-flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700"
+                  onClick={handleManualSubmit}
+                  aria-disabled={!allQuestionsAnswered}
+                  className={`order-2 sm:order-3 inline-flex items-center gap-2 text-white transition ${
+                    allQuestionsAnswered
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-slate-300 text-slate-500 hover:bg-slate-300 hover:text-slate-500 cursor-not-allowed'
+                  }`}
                 >
                   Testi Bitir
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               )}
             </div>
+            {!allQuestionsAnswered && (
+              <p className="text-sm font-medium text-amber-600">
+                Tüm soruları cevaplamadan testi tamamlayamazsınız.
+              </p>
+            )}
           </div>
 
           <Card className="border border-slate-200 bg-white shadow-sm xl:sticky xl:top-6">
@@ -449,7 +497,7 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
               <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
                 {quiz.questions.map((question, index) => {
                   const isCurrent = currentQuestionIndex === index
-                  const isAnswered = Boolean(answers[question.id])
+                  const isAnswered = isQuestionAnswered(question)
                   const isFlagged = flaggedQuestions.has(question.id)
 
                   return (
@@ -480,7 +528,7 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                     <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                     Cevaplandı
                   </span>
-                  <span className="text-slate-900">{getAnsweredCount()}</span>
+                  <span className="text-slate-900">{answeredCount}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
@@ -494,7 +542,7 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                     <span className="h-2 w-2 rounded-full bg-slate-400"></span>
                     Kalan
                   </span>
-                  <span className="text-slate-900">{quiz.questions.length - getAnsweredCount()}</span>
+                  <span className="text-slate-900">{totalQuestions - answeredCount}</span>
                 </div>
               </div>
 
