@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/auth-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { CategoryManagement } from '@/components/admin/category-management'
 import { QuestionManagement } from '@/components/admin/question-management'
@@ -141,9 +140,6 @@ export default function AdminPage() {
                         </div>
                         <div className="flex-1">
                           <div className="font-medium text-slate-900 truncate">{user.name || user.email}</div>
-                          <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-100">
-                            Admin
-                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -218,9 +214,6 @@ export default function AdminPage() {
                 </div>
                 <div className="text-sm">
                   <span className="font-medium text-slate-900">{user.name || user.email}</span>
-                  <Badge variant="secondary" className="ml-2 text-xs bg-blue-50 text-blue-700 border-blue-100">
-                    Admin
-                  </Badge>
                 </div>
               </div>
 
@@ -274,9 +267,6 @@ export default function AdminPage() {
                         <User className="h-12 w-12 text-blue-500 mx-auto mb-3" />
                       </div>
                       <h3 className="text-lg font-semibold text-slate-900">{user.name || user.email}</h3>
-                      <Badge variant="secondary" className="mt-2 bg-blue-50 text-blue-700 border-blue-100">
-                        Admin
-                      </Badge>
                     </div>
 
                     <nav className="space-y-2">
