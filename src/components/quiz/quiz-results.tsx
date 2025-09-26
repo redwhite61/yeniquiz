@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { useSocket } from '@/hooks/use-socket'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -59,10 +57,10 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
   }
 
   const getScoreColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600'
+    if (percentage >= 90) return 'text-emerald-600'
     if (percentage >= 70) return 'text-blue-600'
-    if (percentage >= 50) return 'text-yellow-600'
-    return 'text-red-600'
+    if (percentage >= 50) return 'text-amber-600'
+    return 'text-rose-600'
   }
 
   const getScoreMessage = (percentage: number) => {
@@ -74,8 +72,8 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
     return 'Geliştirilmeli'
   }
 
-  const correctAnswers = quizAttempt.answers.filter(a => a.isCorrect).length
-  const incorrectAnswers = quizAttempt.answers.filter(a => !a.isCorrect).length
+  const correctAnswers = quizAttempt.answers.filter((answer) => answer.isCorrect).length
+  const incorrectAnswers = quizAttempt.answers.filter((answer) => !answer.isCorrect).length
 
   const handleImageClick = (imageUrl: string, alt: string = 'Resim') => {
     setSelectedImageUrl(imageUrl)
@@ -90,148 +88,103 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="w-full h-full bg-repeat" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '60px 60px'
-        }}></div>
-      </div>
-
-      {/* Celebration Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          ></div>
-        ))}
-      </div>
-
-      <div className="relative max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-8 mb-8 shadow-2xl text-center">
-          <div className="flex items-center justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full blur-sm opacity-75 animate-pulse"></div>
-              <Trophy className="relative h-16 w-16 text-yellow-400" />
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-blue-50 to-white p-8 sm:p-12 shadow-xl">
+          <div className="pointer-events-none absolute -left-10 top-12 h-40 w-40 rounded-full bg-blue-100/70 blur-3xl"></div>
+          <div className="pointer-events-none absolute -right-6 -bottom-6 h-48 w-48 rounded-full bg-indigo-100/60 blur-3xl"></div>
+          <div className="relative flex flex-col items-center text-center">
+            <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 text-white shadow-lg shadow-blue-500/20">
+              <Trophy className="h-10 w-10" />
             </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              Test Tamamlandı!
+            </h1>
+            <p className="mt-3 max-w-2xl text-base text-slate-600 sm:text-lg">
+              Tebrikler! Sonuçlarınızı aşağıdaki panellerden inceleyebilir, performansınızı değerlendirebilir ve dilerseniz testi tekrar çözebilirsiniz.
+            </p>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-4">
-            Test Tamamlandı!
-          </h1>
-          <p className="text-xl text-purple-300 max-w-2xl mx-auto">
-            Başarınızı kutluyoruz! Detaylı sonuçlarınız aşağıda
-          </p>
         </div>
 
-        {/* Score Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300 shadow-2xl transform hover:scale-105">
-            <CardHeader className="text-center pb-4">
-              <div className={`text-5xl sm:text-6xl font-bold mb-2 ${
-                quizAttempt.percentage >= 90 ? 'text-green-400' :
-                quizAttempt.percentage >= 70 ? 'text-blue-400' :
-                quizAttempt.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'
-              }`}>
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <Card className="border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <CardHeader className="pb-4 text-center">
+              <div className={`text-5xl font-bold ${getScoreColor(quizAttempt.percentage)}`}>
                 {quizAttempt.percentage.toFixed(1)}%
               </div>
-              <CardDescription className={`text-lg font-bold ${
-                quizAttempt.percentage >= 90 ? 'text-green-400' :
-                quizAttempt.percentage >= 70 ? 'text-blue-400' :
-                quizAttempt.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'
-              }`}>
+              <CardDescription className={`text-sm font-semibold uppercase tracking-wider ${getScoreColor(quizAttempt.percentage)}`}>
                 {getScoreMessage(quizAttempt.percentage)}
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-2">
+              <div className="text-2xl font-semibold text-slate-900">
                 {quizAttempt.score} / {quizAttempt.maxScore}
               </div>
-              <p className="text-sm text-purple-300">Toplam Puan</p>
+              <p className="mt-1 text-sm text-slate-500">Toplam Puan</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300 shadow-2xl transform hover:scale-105">
-            <CardHeader className="text-center pb-4">
-              <div className="text-5xl sm:text-6xl font-bold text-green-400 mb-2">
-                {correctAnswers}
-              </div>
-              <CardDescription className="text-lg font-bold text-green-400">
+          <Card className="border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <CardHeader className="pb-4 text-center">
+              <div className="text-5xl font-bold text-emerald-600">{correctAnswers}</div>
+              <CardDescription className="text-sm font-semibold uppercase tracking-wider text-emerald-600">
                 Doğru Cevap
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="flex items-center justify-center space-x-6 text-sm">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-green-400" />
-                  <span className="text-green-400 font-medium">{correctAnswers}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <XCircle className="h-5 w-5 text-red-400" />
-                  <span className="text-red-400 font-medium">{incorrectAnswers}</span>
-                </div>
+              <div className="flex items-center justify-center gap-6 text-sm font-medium text-slate-600">
+                <span className="inline-flex items-center gap-2 text-emerald-600">
+                  <CheckCircle className="h-5 w-5" />
+                  {correctAnswers}
+                </span>
+                <span className="inline-flex items-center gap-2 text-rose-500">
+                  <XCircle className="h-5 w-5" />
+                  {incorrectAnswers}
+                </span>
               </div>
-              <p className="text-sm text-purple-300 mt-3">
-                Toplam {quizAttempt.answers.length} soru
-              </p>
+              <p className="mt-2 text-sm text-slate-500">Toplam {quizAttempt.answers.length} soru</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 hover:bg-white/15 transition-all duration-300 shadow-2xl transform hover:scale-105">
-            <CardHeader className="text-center pb-4">
-              <div className="text-5xl sm:text-6xl font-bold text-purple-400 mb-2">
-                {formatTime(quizAttempt.timeSpent)}
-              </div>
-              <CardDescription className="text-lg font-bold text-purple-400">
+          <Card className="border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+            <CardHeader className="pb-4 text-center">
+              <div className="text-4xl font-bold text-indigo-600">{formatTime(quizAttempt.timeSpent)}</div>
+              <CardDescription className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
                 Süre
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="flex items-center justify-center space-x-2 text-sm text-purple-300">
-                <Clock className="h-4 w-4 text-purple-400" />
-                <span>Ortalama {Math.round(quizAttempt.timeSpent / quizAttempt.answers.length)} saniye/soru</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-sm text-indigo-600">
+                <Clock className="h-4 w-4" />
+                Ortalama {Math.round(quizAttempt.timeSpent / Math.max(quizAttempt.answers.length, 1))} sn/soru
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Performance Indicator */}
-        <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl mb-8">
-          <CardHeader className="pb-6">
-            <CardTitle className="text-2xl text-white flex items-center justify-between">
-              <span className="flex items-center gap-3">
-                <span className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></span>
-                Performans Göstergesi
+        <Card className="mt-10 border border-slate-200 bg-white shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between text-lg font-semibold text-slate-900">
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                Performans Özeti
               </span>
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }, (_, i) => (
                   <Star
                     key={i}
-                    className={`h-6 w-6 transition-all duration-500 ${
-                      i < Math.floor(quizAttempt.percentage / 20) 
-                        ? 'text-yellow-400 fill-current animate-pulse' 
-                        : 'text-white/20'
-                    }`}
+                    className={`h-5 w-5 ${i < Math.floor(quizAttempt.percentage / 20) ? 'text-amber-400 fill-current' : 'text-slate-200'}`}
                   />
                 ))}
               </div>
             </CardTitle>
+            <CardDescription className="text-sm text-slate-500">
+              Aldığınız puana göre yıldız kazanırsınız. Çubuğu doldurdukça yeni başarıların kilidi açılır.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="relative">
-              <Progress value={quizAttempt.percentage} className="h-4 bg-white/10" />
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-1000" 
-                   style={{ width: `${quizAttempt.percentage}%`, clipPath: 'inset(0 0 0 0)' }}></div>
-            </div>
-            <div className="flex justify-between text-sm text-purple-300 mt-4">
+          <CardContent className="space-y-4">
+            <Progress value={quizAttempt.percentage} className="h-3" />
+            <div className="flex justify-between text-xs font-medium text-slate-500">
               <span>0%</span>
               <span>25%</span>
               <span>50%</span>
@@ -241,222 +194,181 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <button
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <Button
+            variant="outline"
             onClick={() => setReviewMode(!reviewMode)}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 px-6 py-4 h-auto"
+            className="h-auto rounded-2xl border-slate-200 bg-white px-6 py-4 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
           >
-            <Star className="h-4 w-4 mr-2" />
+            <Star className="mr-2 h-4 w-4" />
             {reviewMode ? 'Sonuçları Gizle' : 'Cevapları İncele'}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onRetry}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 px-6 py-4 h-auto shadow-lg shadow-blue-500/25"
+            className="h-auto rounded-2xl bg-blue-600 px-6 py-4 text-white shadow-sm hover:bg-blue-700"
           >
-            <ArrowRight className="h-4 w-4 mr-2" />
+            <ArrowRight className="mr-2 h-4 w-4" />
             Tekrar Çöz
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onExit}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 px-6 py-4 h-auto shadow-lg shadow-purple-500/25"
+            variant="secondary"
+            className="h-auto rounded-2xl border-slate-200 bg-slate-100 px-6 py-4 text-slate-700 hover:border-slate-300 hover:bg-slate-200"
           >
-            <Trophy className="h-4 w-4 mr-2" />
+            <Trophy className="mr-2 h-4 w-4" />
             Ana Sayfaya Dön
-          </button>
+          </Button>
         </div>
 
-        {/* Review Section */}
         {reviewMode && (
-          <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
-            <CardHeader className="pb-6">
-              <CardTitle className="text-2xl text-white flex items-center gap-3">
-                <span className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span>
-                Cevap İncelemesi
-              </CardTitle>
-              <CardDescription className="text-purple-300 text-lg">
-                Tüm soruları ve cevaplarınızı detaylı olarak inceleyin
+          <Card className="mt-10 border border-slate-200 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-slate-900">Cevap İncelemesi</CardTitle>
+              <CardDescription className="text-sm text-slate-500">
+                Tüm sorularınızı tek tek inceleyin, doğru ve yanlış cevaplarınızı kıyaslayın.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {quizAttempt.answers.map((answer, index) => {
-                // Normalize image URLs for this answer
                 const normalizedQuestionImage = normalizeImageUrl(answer.question.imageUrl || '')
-                const normalizedOptions = answer.question.options?.map(option => ({
+                const normalizedOptions = answer.question.options?.map((option) => ({
                   ...option,
                   imageUrl: normalizeImageUrl(option.imageUrl || '')
                 })) || []
-                
-                // Debug logging
-                console.log('Review answer:', answer)
-                console.log('Question imageUrl:', answer.question.imageUrl)
-                console.log('Normalized question image:', normalizedQuestionImage)
-                console.log('Should show image:', (answer.question.type === 'IMAGE' || (answer.question.type === 'MULTIPLE_CHOICE' && normalizedQuestionImage)) && normalizedQuestionImage)
-                
+
+                const answerStateClasses = answer.isCorrect
+                  ? 'border-emerald-200 bg-emerald-50'
+                  : 'border-rose-200 bg-rose-50'
+
                 return (
-                  <div key={answer.questionId} className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
-                    answer.isCorrect 
-                      ? 'bg-green-500/10 border-green-500/30 hover:bg-green-500/15' 
-                      : 'bg-red-500/10 border-red-500/30 hover:bg-red-500/15'
-                  }`}>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <Badge className={`${
-                        answer.isCorrect 
-                          ? 'bg-green-500/20 text-green-400 border-green-500/50' 
-                          : 'bg-red-500/20 text-red-400 border-red-500/50'
-                      } border font-medium px-3 py-1`}>
-                        Soru {index + 1}
-                      </Badge>
-                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 font-medium px-3 py-1">
-                        {answer.points} puan
-                      </Badge>
+                  <div
+                    key={answer.questionId}
+                    className={`rounded-2xl border ${answerStateClasses} p-6 transition hover:shadow-md`}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Badge className={answer.isCorrect ? 'border-emerald-200 bg-white text-emerald-600' : 'border-rose-200 bg-white text-rose-600'}>
+                          Soru {index + 1}
+                        </Badge>
+                        <Badge variant="secondary" className="border-slate-200 bg-slate-100 text-slate-700">
+                          {answer.points} puan
+                        </Badge>
+                      </div>
+                      {answer.isCorrect ? (
+                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                          <CheckCircle className="h-5 w-5" />
+                          Doğru
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-rose-600">
+                          <XCircle className="h-5 w-5" />
+                          Yanlış
+                        </span>
+                      )}
                     </div>
-                    {answer.isCorrect ? (
-                      <div className="flex items-center gap-2 text-green-400">
-                        <CheckCircle className="h-6 w-6" />
-                        <span className="font-bold">Doğru</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-red-400">
-                        <XCircle className="h-6 w-6" />
-                        <span className="font-bold">Yanlış</span>
-                      </div>
+
+                    <p className="mt-4 text-base font-medium text-slate-900">
+                      {answer.question.content}
+                    </p>
+
+                    {(answer.question.type === 'IMAGE' || (answer.question.type === 'MULTIPLE_CHOICE' && normalizedQuestionImage)) && normalizedQuestionImage && (
+                      <button
+                        type="button"
+                        className="mt-4 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
+                        onClick={() => handleImageClick(normalizedQuestionImage, 'Soru resmi')}
+                      >
+                        <img
+                          src={normalizedQuestionImage}
+                          alt="Soru resmi"
+                          className="h-auto w-full cursor-zoom-in object-cover transition hover:opacity-90"
+                          onError={(e) => {
+                            const img = e.currentTarget
+                            img.src = getFallbackImageUrl('question')
+                          }}
+                        />
+                      </button>
                     )}
-                  </div>
 
-                  <p className="text-lg font-medium text-white mb-4 leading-relaxed">
-                    {answer.question.content}
-                  </p>
+                    {(answer.question.type === 'MULTIPLE_CHOICE' || answer.question.type === 'TRUE_FALSE') && normalizedOptions.length > 0 && (
+                      <div className="mt-5 space-y-3">
+                        {normalizedOptions.map((option, optionIndex) => {
+                          const isSelected = answer.answer === optionIndex.toString()
+                          const isCorrect = answer.question.correctAnswer === optionIndex.toString()
 
-                  {(answer.question.type === 'IMAGE' || (answer.question.type === 'MULTIPLE_CHOICE' && normalizedQuestionImage)) && normalizedQuestionImage && (
-                    <div className="mb-4 group relative cursor-pointer" onClick={() => handleImageClick(normalizedQuestionImage, 'Soru resmi')}>
-                      <img 
-                        src={normalizedQuestionImage} 
-                        alt="Soru resmi"
-                        className="max-w-full h-auto rounded-lg border border-white/20 transition-transform duration-200 group-hover:scale-[1.02]"
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          // If the image fails to load, use fallback
-                          img.src = getFallbackImageUrl('question');
-                          console.warn('Question image failed to load, using fallback:', normalizedQuestionImage);
-                        }}
-                      />
-                      {/* Zoom Overlay */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
-                        <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
-                          <ZoomIn className="h-6 w-6 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                          const optionClasses = isSelected
+                            ? isCorrect
+                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                              : 'border-rose-200 bg-rose-50 text-rose-700'
+                            : isCorrect
+                            ? 'border-emerald-200 bg-white text-emerald-600'
+                            : 'border-slate-200 bg-white text-slate-700'
 
-                  {(answer.question.type === 'MULTIPLE_CHOICE' || answer.question.type === 'TRUE_FALSE') && normalizedOptions.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      {normalizedOptions.map((option, optionIndex) => {
-                        const isSelected = answer.answer === optionIndex.toString()
-                        const isCorrect = answer.question.correctAnswer === optionIndex.toString()
-                        
-                        let bgColor = 'bg-white/5 border-white/20'
-                        let textColor = 'text-purple-300'
-                        
-                        if (isSelected && isCorrect) {
-                          bgColor = 'bg-green-500/20 border-green-500/50'
-                          textColor = 'text-green-400'
-                        }
-                        if (isSelected && !isCorrect) {
-                          bgColor = 'bg-red-500/20 border-red-500/50'
-                          textColor = 'text-red-400'
-                        }
-                        if (!isSelected && isCorrect) {
-                          bgColor = 'bg-green-500/10 border-green-500/30'
-                          textColor = 'text-green-400'
-                        }
-                        
-                        return (
-                          <div
-                            key={optionIndex}
-                            className={`p-4 rounded-xl border-2 transition-all duration-200 ${bgColor}`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className={`font-medium ${textColor}`}>
+                          return (
+                            <div
+                              key={optionIndex}
+                              className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${optionClasses}`}
+                            >
+                              <span>
                                 {String.fromCharCode(65 + optionIndex)}. {option.text}
                               </span>
                               {option.imageUrl && (
-                                <div className="ml-2 group relative cursor-pointer" onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleImageClick(option.imageUrl, `Seçenek ${String.fromCharCode(65 + optionIndex)}`)
-                                }}>
-                                  <img 
-                                    src={option.imageUrl} 
+                                <button
+                                  type="button"
+                                  onClick={() => handleImageClick(option.imageUrl, `Seçenek ${String.fromCharCode(65 + optionIndex)}`)}
+                                  className="group relative h-12 w-12 overflow-hidden rounded-lg border border-slate-200 bg-white"
+                                >
+                                  <img
+                                    src={option.imageUrl}
                                     alt={`Seçenek ${String.fromCharCode(65 + optionIndex)}`}
-                                    className="w-12 h-12 object-cover rounded border border-white/20 transition-transform duration-200 group-hover:scale-110"
+                                    className="h-full w-full object-cover transition group-hover:scale-105"
                                     onError={(e) => {
-                                      const img = e.currentTarget;
-                                      // If the image fails to load, use fallback
-                                      img.src = getFallbackImageUrl('option');
-                                      console.warn('Option image failed to load, using fallback:', option.imageUrl);
+                                      const img = e.currentTarget
+                                      img.src = getFallbackImageUrl('option')
                                     }}
                                   />
-                                  {/* Zoom Overlay */}
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded flex items-center justify-center">
-                                    <ZoomIn className="h-3 w-3 text-white" />
-                                  </div>
-                                </div>
+                                  <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white opacity-0 transition group-hover:opacity-100">
+                                    <ZoomIn className="h-4 w-4" />
+                                  </span>
+                                </button>
                               )}
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-
-                  {(answer.question.type === 'TEXT' || answer.question.type === 'IMAGE') && (
-                    <div className="space-y-3 mb-4">
-                      <div className="p-4 rounded-xl border-2 border-blue-500/30 bg-blue-500/10">
-                        <div className="text-sm font-medium text-blue-400 mb-2">
-                          Sizin Cevabınız:
-                        </div>
-                        <div className="text-white">{answer.answer || 'Cevap verilmedi'}</div>
+                          )
+                        })}
                       </div>
-                      <div className="p-4 rounded-xl border-2 border-green-500/30 bg-green-500/10">
-                        <div className="text-sm font-medium text-green-400 mb-2">
-                          Doğru Cevap:
-                        </div>
-                        <div className="text-white">{answer.question.correctAnswer}</div>
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {!answer.isCorrect && (
-                    <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                      <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                    {(answer.question.type === 'TEXT' || answer.question.type === 'IMAGE') && (
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm">
+                          <p className="mb-2 font-semibold text-blue-600">Sizin Cevabınız</p>
+                          <p className="text-slate-700">{answer.answer || 'Cevap verilmedi'}</p>
+                        </div>
+                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+                          <p className="mb-2 font-semibold text-emerald-600">Doğru Cevap</p>
+                          <p className="text-slate-700">{answer.question.correctAnswer}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {!answer.isCorrect && (
+                      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
                         <ArrowRight className="h-4 w-4" />
-                        <span className="font-medium">Doğru cevap: </span>
-                        <span>
-                          {answer.question.type === 'TEXT' || answer.question.type === 'IMAGE'
+                        <span className="font-medium">
+                          Doğru cevap: {answer.question.type === 'TEXT' || answer.question.type === 'IMAGE'
                             ? answer.question.correctAnswer
-                            : answer.question.options && answer.question.options[parseInt(answer.question.correctAnswer)]?.text
-                          }
+                            : answer.question.options?.[parseInt(answer.question.correctAnswer, 10)]?.text}
                         </span>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
                 )
               })}
             </CardContent>
           </Card>
         )}
       </div>
-      
-      {/* Image Modal */}
-      <ImageModal
-        isOpen={isModalOpen}
-        onClose={closeImageModal}
-        imageUrl={selectedImageUrl}
-        alt={selectedImageAlt}
-      />
+
+      <ImageModal isOpen={isModalOpen} onClose={closeImageModal} imageUrl={selectedImageUrl} alt={selectedImageAlt} />
     </div>
   )
 }

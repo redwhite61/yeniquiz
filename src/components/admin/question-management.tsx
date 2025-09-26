@@ -11,6 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Category {
   id: string
@@ -56,11 +66,6 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
   const [isImageUploading, setIsImageUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Debug: Monitor formData changes
-  useEffect(() => {
-    console.log('formData changed:', formData)
-  }, [formData])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -88,8 +93,6 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
         return
       }
 
-      console.log('Final formData before submission:', formData)
-
       const url = question ? `/api/questions/${question.id}` : '/api/questions'
       const method = question ? 'PUT' : 'POST'
 
@@ -103,8 +106,6 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
         difficulty: formData.difficulty,
         categoryId: formData.categoryId
       }
-
-      console.log('Submitting question:', payload) // Debug log
 
       const response = await fetch(url, {
         method,
@@ -453,6 +454,8 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Question | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -489,14 +492,12 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
     fetchData()
   }, [])
 
-  const handleDeleteQuestion = async (questionId: string) => {
-    if (!confirm('Bu soruyu silmek istediğinizden emin misiniz?')) {
-      return
-    }
-
+  const handleDeleteQuestion = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
     try {
       setError(null)
-      const response = await fetch(`/api/questions/${questionId}`, {
+      const response = await fetch(`/api/questions/${deleteTarget.id}`, {
         method: 'DELETE',
       })
 
@@ -509,6 +510,9 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
     } catch (error) {
       console.error('Error deleting question:', error)
       setError('Soru silinirken bir hata oluştu')
+    } finally {
+      setIsDeleting(false)
+      setDeleteTarget(null)
     }
   }
 
@@ -516,12 +520,25 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
     return null
   }
 
+  const difficultyCounts = questions.reduce(
+    (acc, question) => {
+      acc[question.difficulty] = (acc[question.difficulty] || 0) + 1
+      return acc
+    },
+    { EASY: 0, MEDIUM: 0, HARD: 0 } as Record<Question['difficulty'], number>
+  )
+
+  const typeCounts = questions.reduce<Record<string, number>>((acc, question) => {
+    acc[question.type] = (acc[question.type] || 0) + 1
+    return acc
+  }, {})
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'EASY': return 'bg-green-600/20 text-green-300 border-green-600/50'
-      case 'MEDIUM': return 'bg-yellow-600/20 text-yellow-300 border-yellow-600/50'
-      case 'HARD': return 'bg-red-600/20 text-red-300 border-red-600/50'
-      default: return 'bg-slate-600/20 text-slate-300 border-slate-600/50'
+      case 'EASY': return 'bg-emerald-50 text-emerald-700 border-emerald-100'
+      case 'MEDIUM': return 'bg-amber-50 text-amber-700 border-amber-100'
+      case 'HARD': return 'bg-rose-50 text-rose-700 border-rose-100'
+      default: return 'bg-slate-100 text-slate-600 border-slate-200'
     }
   }
 
@@ -536,125 +553,190 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-white">Soru Yönetimi</h3>
-          <p className="text-sm text-slate-400">Test sorularını yönetin</p>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-1">
+          <h3 className="text-2xl font-semibold text-slate-900">Soru Yönetimi</h3>
+          <p className="text-sm text-slate-500">
+            Soru bankanızı güncelleyin, içerikleri iyileştirin ve kategorilere göre düzenleyin.
+          </p>
         </div>
         <QuestionForm categories={categories} onSuccess={fetchData} />
       </div>
 
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-none bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-xl">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-emerald-100">Toplam Soru</CardDescription>
+            <CardTitle className="text-3xl font-semibold">{questions.length}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-emerald-100">
+            Aktif soru bankasında bulunan toplam soru sayısı.
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-500">Kolay</CardDescription>
+            <CardTitle className="text-3xl font-semibold text-slate-900">{difficultyCounts.EASY}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-slate-500">
+            Temel seviyedeki sorular.
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-500">Orta</CardDescription>
+            <CardTitle className="text-3xl font-semibold text-slate-900">{difficultyCounts.MEDIUM}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-slate-500">
+            Standart zorluk seviyesindeki sorular.
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 bg-slate-900 text-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-300">Zor</CardDescription>
+            <CardTitle className="text-3xl font-semibold">{difficultyCounts.HARD}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-slate-300">
+            Üst düzey bilgi gerektiren sorular.
+          </CardContent>
+        </Card>
+      </div>
+
+      {Object.keys(typeCounts).length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          {Object.entries(typeCounts).map(([type, count]) => (
+            <Badge
+              key={type}
+              variant="secondary"
+              className="rounded-full border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 shadow-sm"
+            >
+              {getTypeLabel(type)}: {count}
+            </Badge>
+          ))}
+        </div>
+      )}
+
       {error && (
-        <div className="p-4 bg-red-900/20 border border-red-700/50 rounded-md backdrop-blur-sm">
-          <p className="text-sm text-red-300">{error}</p>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="flex h-32 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500"></div>
         </div>
       ) : (
         <div className="grid gap-4">
           {questions.map((question) => (
-            <Card key={question.id} className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="flex-1">
-                  <CardTitle className="text-lg text-white">{question.content}</CardTitle>
-                  <CardDescription className="mt-1 text-slate-400">
-                    {question.category.name} • {getTypeLabel(question.type)}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <QuestionForm
-                    question={question}
-                    categories={categories}
-                    onSuccess={fetchData}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteQuestion(question.id)}
-                    className="border-slate-600 text-slate-300 hover:bg-red-600/20 hover:text-red-300 hover:border-red-600/50 transition-all duration-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {question.imageUrl && (
-                    <div className="flex justify-center">
-                      <img 
-                        src={question.imageUrl} 
-                        alt="Soru resmi" 
-                        className="max-w-full h-auto max-h-32 rounded-md border border-slate-600"
-                        onError={(e) => {
-                          e.currentTarget.src = '';
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
+            <Card
+              key={question.id}
+              className="overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-lg"
+            >
+              <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="space-y-2">
+                    <CardTitle className="text-lg font-semibold text-slate-900">
+                      {question.content}
+                    </CardTitle>
+                    <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide">
+                      <Badge variant="secondary" className={getDifficultyColor(question.difficulty)}>
+                        {getTypeLabel(question.type)}
+                      </Badge>
+                      <Badge variant="secondary" className="rounded-full border-blue-100 bg-blue-50 text-blue-700">
+                        {question.category.name}
+                      </Badge>
+                      <Badge variant="secondary" className="rounded-full border-slate-200 bg-white text-slate-700">
+                        {question.points} Puan
+                      </Badge>
                     </div>
-                  )}
-                  {question.type !== 'TEXT' && question.type !== 'IMAGE' && question.options.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium mb-2 text-slate-300">Seçenekler:</p>
-                      <div className="grid grid-cols-1 gap-2">
-                        {question.options.map((option, index) => (
-                          <div
-                            key={index}
-                            className={`flex items-center space-x-3 p-2 rounded text-sm ${
-                              index.toString() === question.correctAnswer
-                                ? 'bg-green-600/20 text-green-300 border border-green-600/50'
-                                : 'bg-slate-700/50 text-slate-300 border border-slate-600/50'
-                            }`}
-                          >
-                            <span className="font-medium min-w-[20px]">
-                              {String.fromCharCode(65 + index)}.
-                            </span>
-                            <span className="flex-1">{option.text}</span>
-                            {option.imageUrl && (
-                              <img 
-                                src={option.imageUrl} 
-                                alt={`Seçenek ${index + 1}`}
-                                className="h-8 w-8 rounded object-cover border border-slate-500"
-                                onError={(e) => {
-                                  e.currentTarget.src = '';
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {question.type === 'TEXT' && (
-                    <div>
-                      <p className="text-sm font-medium mb-1 text-slate-300">Doğru Cevap:</p>
-                      <p className="text-sm bg-green-600/20 text-green-300 p-2 rounded border border-green-600/50">
-                        {question.correctAnswer}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-4">
-                    <Badge className={getDifficultyColor(question.difficulty)}>
-                      {question.difficulty === 'EASY' ? 'Kolay' : 
-                       question.difficulty === 'MEDIUM' ? 'Orta' : 'Zor'}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-slate-600/20 text-slate-300 border-slate-600/50">
-                      {question.points} Puan
-                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <QuestionForm question={question} categories={categories} onSuccess={fetchData} />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeleteTarget(question)}
+                      className="border-slate-200 text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
+              </div>
+              <CardContent className="space-y-4 p-6">
+                {question.imageUrl && (
+                  <div className="overflow-hidden rounded-lg border border-slate-200">
+                    <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
+                      <ImageIcon className="h-4 w-4" />
+                      <span>Soru görseli</span>
+                    </div>
+                    <img src={question.imageUrl} alt="Soru görseli" className="h-56 w-full object-cover" />
+                  </div>
+                )}
+                {question.options && question.options.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-slate-700">Seçenekler</h4>
+                    <div className="grid gap-2 md:grid-cols-2">
+                      {question.options.map((option, index) => (
+                        <div
+                          key={index}
+                          className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm shadow-sm transition-colors ${
+                            option.text === question.correctAnswer
+                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                              : 'border-slate-200 bg-white text-slate-600'
+                          }`}
+                        >
+                          <span className="truncate pr-2">{option.text}</span>
+                          {option.text === question.correctAnswer && (
+                            <Badge variant="outline" className="border-emerald-200 text-emerald-700">
+                              Doğru
+                            </Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {question.type === 'TEXT' && (
+                  <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+                    <span className="font-medium">Beklenen cevap:</span> {question.correctAnswer || 'Serbest yanıt'}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setDeleteTarget(null)
+          }
+        }}
+      >
+        <AlertDialogContent className="border border-slate-200 bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bu soruyu silmek üzeresiniz</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{deleteTarget?.content}" sorusunu kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteQuestion}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Siliniyor...' : 'Evet, sil'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
