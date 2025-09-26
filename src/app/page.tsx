@@ -22,20 +22,21 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MobileMenu } from '@/components/mobile-menu'
 import { 
-  BookOpen, 
-  Trophy, 
-  User, 
-  LogOut, 
-  Plus, 
-  Play, 
-  Search, 
-  Settings, 
-  HelpCircle, 
+  BookOpen,
+  Trophy,
+  User,
+  LogOut,
+  Plus,
+  Play,
+  Search,
+  Settings,
+  HelpCircle,
   Clock,
   Home,
   BarChart3,
   Award,
   Users,
+  ShieldCheck,
   ChevronDown,
   Menu,
   Bell
@@ -318,17 +319,94 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Quiz Platform</h1>
-            <p className="text-purple-300">Online test ve sınav platformu</p>
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-100 via-white to-indigo-50">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-24 top-20 h-64 w-64 rounded-full bg-blue-200/60 blur-3xl" />
+          <div className="absolute bottom-10 right-0 h-80 w-80 rounded-full bg-purple-200/50 blur-3xl" />
+          <div className="absolute top-1/2 right-1/3 h-40 w-40 -translate-y-1/2 rounded-full bg-indigo-100/60 blur-3xl" />
+        </div>
+        <div className="relative z-10 px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_minmax(0,1fr)]">
+            <div className="space-y-8">
+              <Badge className="w-fit rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                Yeni nesil quiz platformu
+              </Badge>
+              <div className="space-y-4">
+                <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+                  Kurumsal testlerinizi dakikalar içinde hazırlayın.
+                </h1>
+                <p className="text-lg text-slate-600">
+                  QuizMaster ile ekiplerinizi eğitin, sertifikasyonları yönetin ve canlı liderlik tabloları ile motivasyonu yüksek tutun.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl shadow-indigo-100 backdrop-blur">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Güçlü güvenlik</p>
+                      <p className="text-sm text-slate-500">Rol tabanlı yetkilendirme ve detaylı log kayıtları.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl shadow-indigo-100 backdrop-blur">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+                      <BarChart3 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Canlı raporlama</p>
+                      <p className="text-sm text-slate-500">Kişi bazlı skor kartları ve gelişim trendleri.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl shadow-indigo-100 backdrop-blur">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Hızlı kurulum</p>
+                      <p className="text-sm text-slate-500">Hazır şablonlar ve sürükle-bırak soru oluşturma.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-3xl border border-white/60 bg-white/80 p-6 shadow-xl shadow-indigo-100 backdrop-blur">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                      <Users className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Takım ruhu</p>
+                      <p className="text-sm text-slate-500">İster bireysel ister takım bazlı yarışmalar oluşturun.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 -z-10 rounded-[32px] bg-gradient-to-tr from-blue-200/60 via-indigo-200/50 to-purple-200/60 blur-3xl" />
+              <div className="relative">
+                {isLogin ? (
+                  <LoginForm onToggleMode={() => setIsLogin(false)} />
+                ) : (
+                  <RegisterForm onToggleMode={() => setIsLogin(true)} />
+                )}
+              </div>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-6 rounded-3xl border border-white/70 bg-white/60 px-6 py-4 text-sm text-slate-600 shadow-lg shadow-indigo-100 backdrop-blur">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-amber-500" />
+                  12K+ başarı rozetleri dağıtıldı
+                </div>
+                <div className="flex items-center gap-2">
+                  <Play className="h-4 w-4 text-blue-500" />
+                  350+ aktif sınav yayında
+                </div>
+              </div>
+            </div>
           </div>
-          {isLogin ? (
-            <LoginForm onToggleMode={() => setIsLogin(false)} />
-          ) : (
-            <RegisterForm onToggleMode={() => setIsLogin(true)} />
-          )}
         </div>
       </div>
     )
