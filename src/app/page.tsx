@@ -167,22 +167,40 @@ export default function Home() {
     router.push(path)
   }
 
-  const startQuiz = async (quizId: string) => {
+  const shuffleArray = <T,>(items: T[]): T[] => {
+    const shuffled = [...items]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+  }
+
+  const startQuiz = async (quizId: string, options: { shuffle?: boolean } = {}) => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/quiz/${quizId}`)
       if (response.ok) {
         const quizData = await response.json()
-        
+
         // Transform the data structure to match what QuizTaking expects
+        const transformedQuestions = quizData.questions.map((qq: any) => ({
+          ...qq.question,
+          order: qq.order
+        }))
+
+        const normalizedQuestions = options.shuffle
+          ? shuffleArray(transformedQuestions).map((question: any, index: number) => ({
+              ...question,
+              order: index + 1
+            }))
+          : transformedQuestions
+
         const transformedQuiz = {
           ...quizData,
-          questions: quizData.questions.map((qq: any) => ({
-            ...qq.question,
-            order: qq.order
-          }))
+          questions: normalizedQuestions
         }
-        
+
         console.log('Original quiz data:', quizData)
         console.log('Transformed quiz data:', transformedQuiz) // Debug log
         console.log('First question image URL:', transformedQuiz.questions[0]?.imageUrl)
@@ -253,7 +271,7 @@ export default function Home() {
 
   const retryQuiz = () => {
     if (quizAttempt) {
-      startQuiz(quizAttempt.quizId)
+      startQuiz(quizAttempt.quizId, { shuffle: true })
       setQuizAttempt(null)
     }
   }
