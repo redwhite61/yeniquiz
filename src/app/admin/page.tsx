@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import { AnnouncementManagement } from '@/components/admin/announcement-management'
 import { CategoryManagement } from '@/components/admin/category-management'
 import { QuestionManagement } from '@/components/admin/question-management'
 import { QuizManagement } from '@/components/admin/quiz-management'
@@ -26,7 +27,8 @@ import {
   LayoutDashboard,
   Database,
   FileText,
-  Users as UsersIcon
+  Users as UsersIcon,
+  Megaphone
 } from 'lucide-react'
 
 export default function AdminPage() {
@@ -377,7 +379,7 @@ export default function AdminPage() {
         {/* Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-4 min-w-max bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+            <TabsList className="grid w-full grid-cols-5 min-w-max bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
               <TabsTrigger value="categories" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
                 <div className="flex items-center space-x-2">
                   <Database className="h-4 w-4" />
@@ -397,6 +399,13 @@ export default function AdminPage() {
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Testler</span>
                   <span className="sm:hidden">Test</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="announcements" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
+                <div className="flex items-center space-x-2">
+                  <Megaphone className="h-4 w-4" />
+                  <span className="hidden sm:inline">Duyurular</span>
+                  <span className="sm:hidden">Duy</span>
                 </div>
               </TabsTrigger>
               <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
@@ -419,6 +428,10 @@ export default function AdminPage() {
 
           <TabsContent value="quizzes" className="space-y-6">
             <QuizManagement user={user} />
+          </TabsContent>
+
+          <TabsContent value="announcements" className="space-y-6">
+            <AnnouncementManagement />
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">

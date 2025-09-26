@@ -77,6 +77,16 @@ model Quiz {
   attempts    QuizAttempt[]
 }
 
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  icon      String?
+  date      DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model QuizQuestion {
   id         String @id @default(cuid())
   quizId     String

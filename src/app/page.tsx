@@ -21,8 +21,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { MobileMenu } from '@/components/mobile-menu'
-import { 
-  ArrowRight,
+import {
   BookOpen,
   Trophy,
   User,
@@ -40,7 +39,9 @@ import {
   ShieldCheck,
   ChevronDown,
   Menu,
-  Bell
+  Bell,
+  CalendarDays,
+  Megaphone
 } from 'lucide-react'
 
 interface Category {
@@ -70,6 +71,16 @@ interface Quiz {
   }
 }
 
+interface AnnouncementCard {
+  id: string
+  title: string
+  content: string
+  icon?: string | null
+  date?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export default function Home() {
   const router = useRouter()
   const [isLogin, setIsLogin] = useState(true)
@@ -88,6 +99,8 @@ export default function Home() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [announcement, setAnnouncement] = useState<AnnouncementCard | null>(null)
+  const [isAnnouncementLoading, setIsAnnouncementLoading] = useState(true)
   const { user, logout, isLoading: authLoading } = useAuth()
   const { 
     isConnected, 
@@ -136,7 +149,7 @@ export default function Home() {
 
   const fetchUserStats = async () => {
     if (!user) return
-    
+
     try {
       const response = await fetch(`/api/user/stats?userId=${user.id}`)
       if (response.ok) {
@@ -149,6 +162,21 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error fetching user stats:', error)
+    }
+  }
+
+  const fetchAnnouncement = async () => {
+    setIsAnnouncementLoading(true)
+    try {
+      const response = await fetch('/api/announcements')
+      if (response.ok) {
+        const data = await response.json()
+        setAnnouncement(data)
+      }
+    } catch (error) {
+      console.error('Error fetching announcement:', error)
+    } finally {
+      setIsAnnouncementLoading(false)
     }
   }
 
@@ -176,6 +204,10 @@ export default function Home() {
     }
     return shuffled
   }
+
+  useEffect(() => {
+    fetchAnnouncement()
+  }, [])
 
   const startQuiz = async (quizId: string, options: { shuffle?: boolean } = {}) => {
     setIsLoading(true)
@@ -307,6 +339,27 @@ export default function Home() {
     const matchesCategory = !selectedCategory || quiz.categoryId === selectedCategory
     return matchesSearch && matchesCategory
   })
+
+  const formatDateLabel = (value?: string | null) => {
+    if (!value) return null
+    try {
+      return new Intl.DateTimeFormat('tr-TR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }).format(new Date(value))
+    } catch (error) {
+      return null
+    }
+  }
+
+  const announcementDateLabel = formatDateLabel(announcement?.date)
+  const announcementUpdatedLabel = announcementDateLabel ? null : formatDateLabel(announcement?.updatedAt)
+  const hasCustomAnnouncementIcon = Boolean(announcement?.icon && announcement.icon.trim() !== '')
+  const announcementIcon = hasCustomAnnouncementIcon ? announcement?.icon?.trim() ?? '' : ''
+  const announcementTitle = announcement?.title?.trim() || 'Başlık'
+  const announcementContent = announcement?.content?.trim() ||
+    'Güncellemeler veya duyurular metni burada görüntülenecek.'
 
   if (authLoading) {
     return (
@@ -699,85 +752,40 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-          <div className="grid gap-6 lg:grid-cols-12">
-            <div className="relative overflow-hidden rounded-3xl bg-white p-8 sm:p-10 lg:p-12 shadow-xl border border-slate-200 lg:col-span-7">
-              <div
-                className="absolute inset-y-0 right-0 hidden md:block"
-                aria-hidden
-              >
-                <div className="absolute -right-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-100 via-indigo-100 to-cyan-100 blur-3xl opacity-70"></div>
-              </div>
-              <div className="relative max-w-xl">
-                <div className="inline-flex items-center bg-blue-50 text-blue-700 rounded-full px-4 py-2 mb-6 border border-blue-100">
-                  <span className="text-sm font-medium">🚀 Yeni Nesil Test Platformu</span>
-                </div>
-                <h1 className="text-4xl sm:text-5xl font-semibold text-slate-900 mb-6 leading-tight tracking-tight">
-                  Bilgiyi <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500">Keşfet</span>, Başarıyı
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-600"> Yakala</span>
-                </h1>
-                <p className="text-lg sm:text-xl text-slate-600 mb-8 leading-relaxed">
-                  Kişiselleştirilmiş testler, anlık istatistikler ve modern raporlarla öğrenme deneyimini profesyonel seviyeye taşıyın.
-                  QuizMaster ile hedeflerinize ulaşmak için ihtiyacınız olan tüm araçları tek bir yerde keşfedin.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    className="inline-flex items-center justify-center gap-2 rounded-full text-base font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 shadow-lg hover:shadow-xl"
-                    onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
-                  >
-                    <Play className="h-5 w-5" />
-                    Teste Başla
-                  </button>
-                  <button
-                    className="inline-flex items-center justify-center gap-2 rounded-full text-base font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 border border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50 px-8 py-3 shadow-sm"
-                    onClick={() => window.location.href = '/leaderboard'}
-                  >
-                    <Trophy className="h-5 w-5" />
-                    Liderlik Tablosu
-                  </button>
-                </div>
-              </div>
+          <div className="relative overflow-hidden rounded-3xl bg-white p-8 sm:p-10 lg:p-12 shadow-xl border border-slate-200">
+            <div className="absolute inset-y-0 right-0 hidden md:block" aria-hidden>
+              <div className="absolute -right-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-gradient-to-br from-blue-100 via-indigo-100 to-cyan-100 blur-3xl opacity-70"></div>
             </div>
-            <div className="lg:col-span-5 grid gap-6">
-              <div className="rounded-3xl bg-white border border-slate-200 shadow-lg p-8 flex flex-col justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white flex items-center justify-center shadow-md">
-                    <Play className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900">Teste hemen başlayın</h3>
-                    <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                      İlginizi çeken kategorileri seçin, dinamik sorularla bilgilerinizi ölçün ve güçlü raporlarla gelişiminizi takip edin.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-6 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
-                  onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Teste Başla
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                <Badge variant="secondary" className="flex items-center gap-3 rounded-full bg-blue-50 text-blue-700 border-blue-100">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg">
+                    {hasCustomAnnouncementIcon ? (
+                      <span>{announcementIcon}</span>
+                    ) : (
+                      <Megaphone className="h-5 w-5 text-blue-600" />
+                    )}
+                  </span>
+                  Platform Duyurusu
+                </Badge>
+                {announcementDateLabel ? (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
+                    <CalendarDays className="h-4 w-4" />
+                    {announcementDateLabel}
+                  </span>
+                ) : announcementUpdatedLabel ? (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500">
+                    <CalendarDays className="h-4 w-4" />
+                    Güncellendi: {announcementUpdatedLabel}
+                  </span>
+                ) : null}
               </div>
-              <div className="rounded-3xl bg-white border border-slate-200 shadow-lg p-8 flex flex-col justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-md">
-                    <Trophy className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900">Liderlik tablosuna göz atın</h3>
-                    <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                      Skorunuzu toplulukla karşılaştırın, başarı rozetlerini toplayın ve hedeflerinize ulaşmak için motivasyon sağlayın.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  className="mt-6 inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-6 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:text-blue-700 hover:bg-blue-50"
-                  onClick={() => router.push('/leaderboard')}
-                >
-                  Liderlik Tablosu
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
+              <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 leading-tight">
+                {isAnnouncementLoading ? 'Duyuru yükleniyor...' : announcementTitle}
+              </h2>
+              <p className="text-lg sm:text-xl text-slate-600 leading-relaxed">
+                {isAnnouncementLoading ? 'Güncel duyurular kısa süre içinde burada görünecek.' : announcementContent}
+              </p>
             </div>
           </div>
         </div>
