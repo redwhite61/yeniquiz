@@ -101,9 +101,15 @@ export async function POST(request: NextRequest) {
         if (question.type === 'TEXT') {
           isCorrect = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim()
         } else {
-          isCorrect = userAnswer === question.correctAnswer
+          const userAnswerString = userAnswer.toString()
+          const parsedCorrectIndex = Number.parseInt(question.correctAnswer || '', 10)
+          if (!Number.isNaN(parsedCorrectIndex)) {
+            isCorrect = userAnswerString === parsedCorrectIndex.toString()
+          } else {
+            isCorrect = userAnswerString === question.correctAnswer
+          }
         }
-        
+
         if (isCorrect) {
           points = question.points
           totalScore += points

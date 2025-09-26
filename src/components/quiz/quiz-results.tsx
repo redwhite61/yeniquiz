@@ -231,10 +231,24 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
             <CardContent className="space-y-6">
               {quizAttempt.answers.map((answer, index) => {
                 const normalizedQuestionImage = normalizeImageUrl(answer.question.imageUrl || '')
-                const normalizedOptions = answer.question.options?.map((option) => ({
-                  ...option,
-                  imageUrl: normalizeImageUrl(option.imageUrl || '')
-                })) || []
+                const normalizedOptions = (() => {
+                  if (answer.question.options && answer.question.options.length > 0) {
+                    return answer.question.options.map((option) => ({
+                      ...option,
+                      text: option.text || '',
+                      imageUrl: normalizeImageUrl(option.imageUrl || '')
+                    }))
+                  }
+
+                  if (answer.question.type === 'TRUE_FALSE') {
+                    return [
+                      { text: 'Doğru', imageUrl: '' },
+                      { text: 'Yanlış', imageUrl: '' }
+                    ]
+                  }
+
+                  return []
+                })()
 
                 const answerStateClasses = answer.isCorrect
                   ? 'border-emerald-200 bg-emerald-50'
@@ -271,7 +285,7 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
                       {answer.question.content}
                     </p>
 
-                    {(answer.question.type === 'IMAGE' || (answer.question.type === 'MULTIPLE_CHOICE' && normalizedQuestionImage)) && normalizedQuestionImage && (
+                    {(answer.question.type === 'MULTIPLE_CHOICE' || answer.question.type === 'TRUE_FALSE' || answer.question.type === 'IMAGE') && normalizedQuestionImage && (
                       <button
                         type="button"
                         className="mt-4 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
@@ -289,11 +303,17 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
                       </button>
                     )}
 
-                    {(answer.question.type === 'MULTIPLE_CHOICE' || answer.question.type === 'TRUE_FALSE') && normalizedOptions.length > 0 && (
+                    {(answer.question.type === 'MULTIPLE_CHOICE' || answer.question.type === 'TRUE_FALSE' || answer.question.type === 'IMAGE') && normalizedOptions.length > 0 && (
                       <div className="mt-5 space-y-3">
                         {normalizedOptions.map((option, optionIndex) => {
-                          const isSelected = answer.answer === optionIndex.toString()
-                          const isCorrect = answer.question.correctAnswer === optionIndex.toString()
+                          const parsedSelectedIndex = Number.parseInt(answer.answer || '', 10)
+                          const parsedCorrectIndex = Number.parseInt(answer.question.correctAnswer || '', 10)
+                          const isSelected = !Number.isNaN(parsedSelectedIndex)
+                            ? optionIndex === parsedSelectedIndex
+                            : answer.answer === option.text
+                          const isCorrect = !Number.isNaN(parsedCorrectIndex)
+                            ? optionIndex === parsedCorrectIndex
+                            : option.text === answer.question.correctAnswer
 
                           const optionClasses = isSelected
                             ? isCorrect
@@ -309,7 +329,7 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
                               className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium ${optionClasses}`}
                             >
                               <span>
-                                {String.fromCharCode(65 + optionIndex)}. {option.text}
+                                {String.fromCharCode(65 + optionIndex)}. {option.text || `Seçenek ${optionIndex + 1}`}
                               </span>
                               {option.imageUrl && (
                                 <button
@@ -337,7 +357,7 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
                       </div>
                     )}
 
-                    {(answer.question.type === 'TEXT' || answer.question.type === 'IMAGE') && (
+                    {answer.question.type === 'TEXT' && (
                       <div className="mt-5 grid gap-3 sm:grid-cols-2">
                         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm">
                           <p className="mb-2 font-semibold text-blue-600">Sizin Cevabınız</p>
@@ -354,9 +374,17 @@ export function QuizResults({ quizAttempt, onRetry, onExit, showReview = false }
                       <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
                         <ArrowRight className="h-4 w-4" />
                         <span className="font-medium">
-                          Doğru cevap: {answer.question.type === 'TEXT' || answer.question.type === 'IMAGE'
-                            ? answer.question.correctAnswer
-                            : answer.question.options?.[parseInt(answer.question.correctAnswer, 10)]?.text}
+                          Doğru cevap: {
+                            answer.question.type === 'TEXT'
+                              ? answer.question.correctAnswer
+                              : (() => {
+                                  const parsedCorrectIndex = Number.parseInt(answer.question.correctAnswer || '', 10)
+                                  if (!Number.isNaN(parsedCorrectIndex)) {
+                                    return normalizedOptions[parsedCorrectIndex]?.text || '—'
+                                  }
+                                  return answer.question.correctAnswer
+                                })()
+                          }
                         </span>
                       </div>
                     )}

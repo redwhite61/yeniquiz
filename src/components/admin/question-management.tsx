@@ -51,11 +51,67 @@ interface QuestionFormProps {
 
 function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const normalizeOptions = (type: Question['type'], options?: Question['options']) => {
+    const ensureOptionShape = (option?: { text?: string; imageUrl?: string }) => ({
+      text: option?.text || '',
+      imageUrl: option?.imageUrl || ''
+    })
+
+    if (type === 'TRUE_FALSE') {
+      const baseOptions = options && options.length >= 2 ? options : []
+      return [
+        ensureOptionShape(baseOptions[0] || { text: 'Doğru' }),
+        ensureOptionShape(baseOptions[1] || { text: 'Yanlış' })
+      ]
+    }
+
+    const desiredLength = type === 'MULTIPLE_CHOICE' || type === 'IMAGE' ? 4 : 0
+    if (desiredLength === 0) {
+      return []
+    }
+
+    const existingOptions = options ? options.map((option) => ensureOptionShape(option)) : []
+    if (existingOptions.length >= desiredLength) {
+      return existingOptions
+    }
+
+    const additional = Array.from({ length: desiredLength - existingOptions.length }, () => ensureOptionShape())
+    return [...existingOptions, ...additional]
+  }
+
+  const getInitialCorrectAnswer = () => {
+    if (!question) {
+      return '0'
+    }
+
+    if (question.type === 'TEXT') {
+      return question.correctAnswer || ''
+    }
+
+    if (!question.correctAnswer) {
+      return '0'
+    }
+
+    const parsedIndex = Number.parseInt(question.correctAnswer, 10)
+    if (!Number.isNaN(parsedIndex)) {
+      return parsedIndex.toString()
+    }
+
+    if (question.options && question.options.length > 0) {
+      const matchedIndex = question.options.findIndex((option) => option.text === question.correctAnswer)
+      if (matchedIndex !== -1) {
+        return matchedIndex.toString()
+      }
+    }
+
+    return '0'
+  }
+
   const [formData, setFormData] = useState({
     content: question?.content || '',
     type: question?.type || 'MULTIPLE_CHOICE',
-    options: question?.options || [{ text: '' }, { text: '' }, { text: '' }, { text: '' }],
-    correctAnswer: question?.correctAnswer || '',
+    options: normalizeOptions(question?.type || 'MULTIPLE_CHOICE', question?.options),
+    correctAnswer: question ? getInitialCorrectAnswer() : '0',
     imageUrl: question?.imageUrl || '',
     imageFile: null as File | null,
     points: question?.points || 1,
@@ -65,6 +121,31 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isImageUploading, setIsImageUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const handleTypeChange = (value: Question['type']) => {
+    setFormData((prev) => {
+      const updatedOptions = normalizeOptions(value, prev.options)
+      let nextCorrectAnswer = ''
+
+      if (value === 'TEXT') {
+        nextCorrectAnswer = ''
+      } else {
+        const parsedIndex = Number.parseInt(prev.correctAnswer || '', 10)
+        if (!Number.isNaN(parsedIndex) && parsedIndex < updatedOptions.length) {
+          nextCorrectAnswer = parsedIndex.toString()
+        } else {
+          nextCorrectAnswer = '0'
+        }
+      }
+
+      return {
+        ...prev,
+        type: value,
+        options: updatedOptions,
+        correctAnswer: nextCorrectAnswer
+      }
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,16 +160,31 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
     setError(null)
 
     try {
-      // For IMAGE type questions, validate that an image is uploaded
-      if (formData.type === 'IMAGE' && !formData.imageUrl && !formData.imageFile) {
-        setError('Resimli sorular için bir resim yüklemeniz gerekmektedir')
+      const requiresImageQuestion = formData.type !== 'TEXT'
+      if (requiresImageQuestion && !formData.imageUrl && !formData.imageFile) {
+        setError('Bu soru tipi için soru görseli eklemelisiniz')
         setIsLoading(false)
         return
       }
 
-      // Validate options for multiple choice and true/false questions
-      if ((formData.type === 'MULTIPLE_CHOICE' || formData.type === 'TRUE_FALSE') && (!formData.options || !Array.isArray(formData.options) || formData.options.length === 0)) {
-        setError('Çoktan seçmeli ve doğru/yanlış sorular için seçenekler gereklidir')
+      const requiresOptions = formData.type === 'MULTIPLE_CHOICE' || formData.type === 'TRUE_FALSE' || formData.type === 'IMAGE'
+      if (requiresOptions) {
+        if (!formData.options || !Array.isArray(formData.options) || formData.options.length === 0) {
+          setError('Bu soru tipi için seçenekler gereklidir')
+          setIsLoading(false)
+          return
+        }
+
+        const hasIncompleteOption = formData.options.some((opt) => !opt.text.trim() || !opt.imageUrl)
+        if (hasIncompleteOption) {
+          setError('Lütfen tüm seçenekler için metin ve görsel ekleyin')
+          setIsLoading(false)
+          return
+        }
+      }
+
+      if (requiresOptions && (formData.correctAnswer === '' || formData.correctAnswer === undefined || formData.correctAnswer === null)) {
+        setError('Lütfen doğru cevabı seçin')
         setIsLoading(false)
         return
       }
@@ -99,7 +195,7 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
       const payload = {
         content: formData.content,
         type: formData.type,
-        options: formData.type === 'TEXT' ? null : formData.options.filter(opt => opt.text.trim() !== ''),
+        options: formData.type === 'TEXT' ? null : formData.options,
         correctAnswer: formData.correctAnswer,
         imageUrl: formData.imageUrl,
         points: formData.points,
@@ -121,8 +217,8 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
         setFormData({
           content: '',
           type: 'MULTIPLE_CHOICE',
-          options: [{ text: '' }, { text: '' }, { text: '' }, { text: '' }],
-          correctAnswer: '',
+          options: normalizeOptions('MULTIPLE_CHOICE'),
+          correctAnswer: '0',
           imageUrl: '',
           imageFile: null,
           points: 1,
@@ -143,16 +239,37 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
   }
 
   const addOption = () => {
-    setFormData({
-      ...formData,
-      options: [...formData.options, { text: '', imageUrl: '' }]
+    setFormData((prev) => {
+      if (prev.type === 'TRUE_FALSE') {
+        return prev
+      }
+
+      return {
+        ...prev,
+        options: [...prev.options, { text: '', imageUrl: '' }]
+      }
     })
   }
 
   const removeOption = (index: number) => {
-    setFormData({
-      ...formData,
-      options: formData.options.filter((_, i) => i !== index)
+    setFormData((prev) => {
+      const updatedOptions = prev.options.filter((_, i) => i !== index)
+
+      let updatedCorrectAnswer = prev.correctAnswer
+      const parsedCorrectAnswer = Number.parseInt(prev.correctAnswer || '', 10)
+      if (!Number.isNaN(parsedCorrectAnswer)) {
+        if (parsedCorrectAnswer === index) {
+          updatedCorrectAnswer = '0'
+        } else if (parsedCorrectAnswer > index) {
+          updatedCorrectAnswer = (parsedCorrectAnswer - 1).toString()
+        }
+      }
+
+      return {
+        ...prev,
+        options: updatedOptions,
+        correctAnswer: updatedCorrectAnswer
+      }
     })
   }
 
@@ -209,7 +326,7 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
               />
             </div>
 
-            {(formData.type === 'IMAGE' || formData.type === 'MULTIPLE_CHOICE') && (
+            {(formData.type === 'IMAGE' || formData.type === 'MULTIPLE_CHOICE' || formData.type === 'TRUE_FALSE') && (
               <div className="grid grid-cols-4 items-start gap-4">
                 <Label className="text-right pt-2">
                   Soru Resmi
@@ -226,23 +343,15 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
                   <ImageUpload
                     value={formData.imageUrl}
                     onChange={(url) => {
-                      console.log('ImageUpload onChange called with URL:', url)
-                      console.log('Current formData.imageUrl:', formData.imageUrl)
-                      setFormData(prev => {
-                        console.log('Updating formData imageUrl from', prev.imageUrl, 'to', url)
-                        return { ...prev, imageUrl: url }
-                      })
+                      setFormData((prev) => ({ ...prev, imageUrl: url }))
                     }}
                     onFileChange={(file) => {
-                      console.log('ImageUpload onFileChange called with file:', file?.name)
-                      setFormData(prev => ({ ...prev, imageFile: file }))
+                      setFormData((prev) => ({ ...prev, imageFile: file }))
                     }}
                     onUploadStart={() => {
-                      console.log('Upload started')
                       setIsImageUploading(true)
                     }}
                     onUploadEnd={() => {
-                      console.log('Upload ended')
                       setIsImageUploading(false)
                     }}
                     label="Soru Resmi Yükle"
@@ -258,7 +367,7 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
               </Label>
               <Select
                 value={formData.type}
-                onValueChange={(value) => setFormData({ ...formData, type: value as any })}
+                onValueChange={(value) => handleTypeChange(value as Question['type'])}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Soru tipi seçin" />
@@ -352,16 +461,18 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
                     </div>
                   ))}
                   
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addOption}
-                    className="w-full"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Seçenek Ekle
-                  </Button>
+                  {formData.type !== 'TRUE_FALSE' && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addOption}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Seçenek Ekle
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
@@ -678,24 +789,44 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                 {question.options && question.options.length > 0 && (
                   <div className="space-y-2">
                     <h4 className="text-sm font-semibold text-slate-700">Seçenekler</h4>
-                    <div className="grid gap-2 md:grid-cols-2">
-                      {question.options.map((option, index) => (
-                        <div
-                          key={index}
-                          className={`flex items-center justify-between rounded-lg border px-3 py-2 text-sm shadow-sm transition-colors ${
-                            option.text === question.correctAnswer
-                              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                              : 'border-slate-200 bg-white text-slate-600'
-                          }`}
-                        >
-                          <span className="truncate pr-2">{option.text}</span>
-                          {option.text === question.correctAnswer && (
-                            <Badge variant="outline" className="border-emerald-200 text-emerald-700">
-                              Doğru
-                            </Badge>
-                          )}
-                        </div>
-                      ))}
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {question.options.map((option, index) => {
+                        const parsedCorrectIndex = Number.parseInt(question.correctAnswer || '', 10)
+                        const isCorrect = !Number.isNaN(parsedCorrectIndex)
+                          ? index === parsedCorrectIndex
+                          : option.text === question.correctAnswer
+
+                        return (
+                          <div
+                            key={index}
+                            className={`flex flex-col gap-3 rounded-lg border px-3 py-3 text-sm shadow-sm transition-colors ${
+                              isCorrect
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'border-slate-200 bg-white text-slate-600'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <span className="font-medium text-slate-700">
+                                {String.fromCharCode(65 + index)}. {option.text || `Seçenek ${index + 1}`}
+                              </span>
+                              {isCorrect && (
+                                <Badge variant="outline" className="border-emerald-200 text-emerald-700">
+                                  Doğru
+                                </Badge>
+                              )}
+                            </div>
+                            {option.imageUrl && (
+                              <div className="overflow-hidden rounded-md border border-slate-200">
+                                <img
+                                  src={option.imageUrl}
+                                  alt={`Seçenek ${index + 1}`}
+                                  className="h-28 w-full object-cover"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )}

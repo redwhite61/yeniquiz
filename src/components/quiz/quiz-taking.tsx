@@ -72,10 +72,24 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
   const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100
 
   const normalizedQuestionImage = normalizeImageUrl(currentQuestion.imageUrl || '')
-  const normalizedOptions = currentQuestion.options.map((option) => ({
-    ...option,
-    imageUrl: normalizeImageUrl(option.imageUrl || '')
-  }))
+  const normalizedOptions = (() => {
+    if (currentQuestion.options && currentQuestion.options.length > 0) {
+      return currentQuestion.options.map((option) => ({
+        ...option,
+        text: option.text || '',
+        imageUrl: normalizeImageUrl(option.imageUrl || '')
+      }))
+    }
+
+    if (currentQuestion.type === 'TRUE_FALSE') {
+      return [
+        { text: 'Doğru', imageUrl: '' },
+        { text: 'Yanlış', imageUrl: '' }
+      ]
+    }
+
+    return []
+  })()
 
   useEffect(() => {
     if (timeLeft === null) return
@@ -242,7 +256,7 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                 <CardTitle className="text-xl font-semibold leading-relaxed text-slate-900 sm:text-2xl">
                   {currentQuestion.content}
                 </CardTitle>
-                {(currentQuestion.type === 'IMAGE' || (currentQuestion.type === 'MULTIPLE_CHOICE' && normalizedQuestionImage)) &&
+                {(currentQuestion.type === 'MULTIPLE_CHOICE' || currentQuestion.type === 'TRUE_FALSE' || currentQuestion.type === 'IMAGE') &&
                   normalizedQuestionImage && (
                     <div
                       className="group relative mt-2 cursor-pointer overflow-hidden rounded-xl border border-slate-200"
@@ -266,9 +280,9 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                   )}
               </CardHeader>
               <CardContent className="space-y-6">
-                {currentQuestion.type === 'MULTIPLE_CHOICE' && (
+                {(currentQuestion.type === 'MULTIPLE_CHOICE' || currentQuestion.type === 'IMAGE') && (
                   <div className="space-y-3">
-                    {currentQuestion.options.map((option, index) => {
+                    {normalizedOptions.map((option, index) => {
                       const isSelected = answers[currentQuestion.id] === index.toString()
                       return (
                         <div
@@ -288,7 +302,7 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                             {String.fromCharCode(65 + index)}
                           </div>
                           <Label className="flex-1 cursor-pointer text-sm font-medium text-slate-700">
-                            {option.text}
+                            {option.text || `Seçenek ${index + 1}`}
                           </Label>
                           {normalizedOptions[index]?.imageUrl && (
                             <div
@@ -323,11 +337,11 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
 
                 {currentQuestion.type === 'TRUE_FALSE' && (
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {['Doğru', 'Yanlış'].map((option, index) => {
+                    {normalizedOptions.slice(0, 2).map((option, index) => {
                       const isSelected = answers[currentQuestion.id] === index.toString()
                       return (
                         <div
-                          key={option}
+                          key={index}
                           onClick={() => handleAnswerChange(currentQuestion.id, index.toString())}
                           className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border p-6 text-center text-sm font-medium transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-sm ${
                             getTrueFalseStyles(isSelected, index === 0)
@@ -336,22 +350,45 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                           <div
                             className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${
                               isSelected
-                                ? index === 0
-                                  ? 'border-emerald-400 bg-emerald-500 text-white'
-                                  : 'border-rose-400 bg-rose-500 text-white'
-                                : 'border-slate-200 text-slate-500'
-                            }`}
+                              ? index === 0
+                                ? 'border-emerald-400 bg-emerald-500 text-white'
+                                : 'border-rose-400 bg-rose-500 text-white'
+                              : 'border-slate-200 text-slate-500'
+                          }`}
                           >
-                            {option.charAt(0)}
+                            {option.text?.charAt(0) || (index === 0 ? 'D' : 'Y')}
                           </div>
-                          {option}
+                          <span className="text-base font-semibold text-slate-700">{option.text || (index === 0 ? 'Doğru' : 'Yanlış')}</span>
+                          {option.imageUrl && (
+                            <button
+                              type="button"
+                              className="group relative mt-2 h-24 w-full overflow-hidden rounded-lg border border-slate-200 bg-white"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleImageClick(option.imageUrl || '', `Seçenek ${index === 0 ? 'Doğru' : 'Yanlış'}`)
+                              }}
+                            >
+                              <img
+                                src={option.imageUrl}
+                                alt={`Seçenek ${index === 0 ? 'Doğru' : 'Yanlış'}`}
+                                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                  const img = e.currentTarget
+                                  img.src = getFallbackImageUrl('option')
+                                }}
+                              />
+                              <span className="absolute inset-0 flex items-center justify-center bg-slate-900/30 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                <ZoomIn className="h-5 w-5" />
+                              </span>
+                            </button>
+                          )}
                         </div>
                       )
                     })}
                   </div>
                 )}
 
-                {(currentQuestion.type === 'TEXT' || currentQuestion.type === 'IMAGE') && (
+                {currentQuestion.type === 'TEXT' && (
                   <div className="space-y-2">
                     <Textarea
                       value={answers[currentQuestion.id] || ''}
