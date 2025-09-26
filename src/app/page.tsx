@@ -536,70 +536,99 @@ export default function Home() {
                 </button>
               </div>
 
+
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-blue-200 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                   >
                     <span className="sr-only">Hesap seçeneklerini aç</span>
-                    <div className="relative">
-                      <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white"></div>
-                      {user.avatar ? (
-                        <img
-                          src={`${user.avatar}?t=${Date.now()}`}
-                          alt="Profil resmi"
-                          className="h-9 w-9 rounded-full border border-slate-200 object-cover"
-                          onError={(e) => {
-                            console.error('Avatar failed to load on homepage:', e.currentTarget.src)
-                            e.currentTarget.src = ''
-                            e.currentTarget.style.display = 'none'
-                          }}
-                          onLoad={(e) => {
-                            console.log('Avatar loaded successfully on homepage:', e.currentTarget.src)
-                          }}
-                        />
-                      ) : (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100">
-                          <User className="h-5 w-5 text-slate-400" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col text-left">
-                      <span className="font-semibold text-slate-900">
-                        {user.name || user.email}
-                      </span>
-                      <Badge variant="secondary" className="mt-0.5 w-fit border-blue-100 bg-blue-50 text-xs text-blue-700">
-                        {user.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
-                      </Badge>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                    <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+                    {user.avatar ? (
+                      <img
+                        src={`${user.avatar}?t=${Date.now()}`}
+                        alt="Profil resmi"
+                        className="h-10 w-10 rounded-full object-cover"
+                        onError={(e) => {
+                          console.error('Avatar failed to load on homepage:', e.currentTarget.src)
+                          e.currentTarget.src = ''
+                          e.currentTarget.style.display = 'none'
+                        }}
+                        onLoad={(e) => {
+                          console.log('Avatar loaded successfully on homepage:', e.currentTarget.src)
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                        <User className="h-5 w-5 text-slate-400" />
+                      </div>
+                    )}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1">
-                  <DropdownMenuLabel>Hızlı Erişim</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {user.role === 'ADMIN' && (
-                    <DropdownMenuItem onSelect={() => handleNavigation('/admin')}>
-                      <Settings className="h-4 w-4 text-slate-500" />
-                      Admin Panel
+                <DropdownMenuContent
+                  align="end"
+                  className="w-64 overflow-hidden rounded-2xl border border-slate-200 p-0 shadow-xl"
+                >
+                  <div className="flex items-center gap-3 bg-slate-50 px-4 py-3">
+                    {user.avatar ? (
+                      <img
+                        src={`${user.avatar}?t=${Date.now()}`}
+                        alt="Profil resmi"
+                        className="h-10 w-10 rounded-full border border-slate-200 object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 ring-1 ring-slate-200">
+                        <User className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {user.name || 'Quiz Kullanıcısı'}
+                      </p>
+                      <p className="text-xs text-slate-500">{user.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator className="mx-0" />
+                  <div className="py-2">
+                    <DropdownMenuItem
+                      onSelect={() => handleNavigation('/profile')}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 focus:bg-blue-50 focus:text-blue-700"
+                    >
+                      <User className="h-4 w-4" />
+                      My Profile
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onSelect={() => handleNavigation('/leaderboard')}>
-                    <Trophy className="h-4 w-4 text-slate-500" />
-                    Liderlik
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleNavigation('/profile')}>
-                    <User className="h-4 w-4 text-slate-500" />
-                    Profil
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" onSelect={() => logout()}>
-                    <LogOut className="h-4 w-4" />
-                    Çıkış
+                    <DropdownMenuItem
+                      onSelect={() => handleNavigation('/leaderboard')}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 focus:bg-blue-50 focus:text-blue-700"
+                    >
+                      <Trophy className="h-4 w-4" />
+                      Liderlik
+                    </DropdownMenuItem>
+                    {user.role === 'ADMIN' && (
+                      <DropdownMenuItem
+                        onSelect={() => handleNavigation('/admin')}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 focus:bg-blue-50 focus:text-blue-700"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Admin Panel
+                      </DropdownMenuItem>
+                    )}
+                  </div>
+                  <DropdownMenuSeparator className="mx-0" />
+                  <DropdownMenuItem
+                    onSelect={() => logout()}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                  >
+                    <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                      <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+                    </span>
+                    Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
             </div>
 
             {/* Mobile Menu */}
