@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { Trophy, Medal, Award, User, ArrowLeft, Crown, Star, Zap, Menu, Settings } from 'lucide-react'
+import { Trophy, Medal, Award, User, Crown, Star, Zap, Menu, Settings } from 'lucide-react'
 
 interface UserScore {
   id: string
@@ -143,13 +143,6 @@ export default function LeaderboardPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/70">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => (window.location.href = '/')}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:border-blue-200 hover:text-blue-700 hover:shadow-sm"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Ana Sayfa
-            </button>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-rose-400 text-white shadow-inner">
                 <Trophy className="h-5 w-5" />
