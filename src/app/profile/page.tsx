@@ -1,10 +1,19 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+
 import { useAuth } from '@/contexts/auth-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
 import { MobileMenu } from '@/components/mobile-menu'
 import {
@@ -19,7 +28,8 @@ import {
   Star,
   Menu,
   Camera,
-  X
+  X,
+  Settings
 } from 'lucide-react'
 
 interface QuizAttempt {
@@ -71,6 +81,7 @@ const getPerformanceLevel = (percentage: number) => {
 }
 
 export default function ProfilePage() {
+  const router = useRouter()
   const { user, logout, isLoading: authLoading } = useAuth()
   const [userStats, setUserStats] = useState<UserStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -80,6 +91,10 @@ export default function ProfilePage() {
   const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null)
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleNavigation = (path: string) => {
+    router.push(path)
+  }
 
   const fetchUserProfile = async () => {
     if (!user) return
@@ -327,18 +342,89 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <span className="text-sm font-medium text-slate-700">{user.name || user.email}</span>
-            <Badge variant="secondary" className="border-blue-100 bg-blue-50 text-blue-700">
-              {user.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
-            </Badge>
-            <Button
-              variant="outline"
-              onClick={logout}
-              className="border-rose-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50"
-            >
-              Çıkış
-            </Button>
+          <div className="hidden items-center gap-3 md:flex">
+            <span className="text-sm font-medium text-slate-600">{user.name || user.email}</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-blue-200 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                >
+                  <span className="sr-only">Hesap menüsünü aç</span>
+                  <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+                  {user.avatar ? (
+                    <img
+                      src={`${user.avatar}?t=${Date.now()}`}
+                      alt="Profil resmi"
+                      className="h-10 w-10 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = ''
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                      <User className="h-5 w-5 text-slate-400" />
+                    </div>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60 overflow-hidden rounded-2xl border border-slate-200 p-0 shadow-xl">
+                <div className="flex items-center gap-3 bg-slate-50 px-4 py-3">
+                  {user.avatar ? (
+                    <img
+                      src={`${user.avatar}?t=${Date.now()}`}
+                      alt="Profil resmi"
+                      className="h-10 w-10 rounded-full border border-slate-200 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-400 ring-1 ring-slate-200">
+                      <User className="h-5 w-5" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{user.name || 'Quiz Kullanıcısı'}</p>
+                    <p className="text-xs text-slate-500">{user.email}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator className="mx-0" />
+                <div className="py-2">
+                  <DropdownMenuItem
+                    onSelect={() => handleNavigation('/profile')}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 focus:bg-blue-50 focus:text-blue-700"
+                  >
+                    <User className="h-4 w-4" />
+                    Profil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => handleNavigation('/leaderboard')}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 focus:bg-blue-50 focus:text-blue-700"
+                  >
+                    <Trophy className="h-4 w-4" />
+                    Liderlik
+                  </DropdownMenuItem>
+                  {user.role === 'ADMIN' && (
+                    <DropdownMenuItem
+                      onSelect={() => handleNavigation('/admin')}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 focus:bg-blue-50 focus:text-blue-700"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Admin Panel
+                    </DropdownMenuItem>
+                  )}
+                </div>
+                <DropdownMenuSeparator className="mx-0" />
+                <DropdownMenuItem
+                  onSelect={() => logout()}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-600"
+                >
+                  <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+                  </span>
+                  Çıkış
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="flex items-center gap-2 md:hidden">
