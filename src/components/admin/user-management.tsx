@@ -622,7 +622,7 @@ export function UserManagement({ user }: UserManagementProps) {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="bg-white border border-slate-200 text-slate-900 w-[95vw] max-w-none h-[90vh] flex flex-col p-0">
+                          <DialogContent className="bg-white border border-slate-200 text-slate-900 w-[95vw] max-w-[95vw] sm:max-w-none h-[90vh] flex flex-col p-0">
                             <DialogHeader className="px-6 pt-6">
                               <DialogTitle className="text-slate-900">Kullanıcı Analizi</DialogTitle>
                               <DialogDescription className="text-slate-500">
