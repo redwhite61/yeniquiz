@@ -29,15 +29,36 @@ interface QuizCardProps {
   isStarting?: boolean
 }
 
+const formatTimeLimit = (minutes?: number | null) => {
+  if (!minutes || minutes <= 0) {
+    return 'Belirtilmedi'
+  }
+
+  if (minutes < 60) {
+    return `${minutes} dk.`
+  }
+
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+  const hourLabel = `${hours} sa.`
+
+  if (!remainingMinutes) {
+    return hourLabel
+  }
+
+  return `${hourLabel} ${remainingMinutes} dk.`
+}
+
 export function QuizCard({ quiz, onStart, isStarting = false }: QuizCardProps) {
   const fallbackBackground = useMemo(() => {
     const baseColor = quiz.category.color || '#2563eb'
     return `linear-gradient(135deg, ${baseColor} 0%, rgba(15,23,42,0.85) 100%)`
   }, [quiz.category.color])
 
-  const questionLabel = `${quiz._count.questions} soru`
-  const attemptsLabel = `${quiz._count.attempts} deneme`
-  const timeLimitLabel = quiz.timeLimit ? `${quiz.timeLimit} dakika` : 'Belirtilmedi'
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('tr-TR'), [])
+  const questionLabel = `${numberFormatter.format(quiz._count.questions)} soru`
+  const attemptsLabel = numberFormatter.format(quiz._count.attempts)
+  const timeLimitLabel = formatTimeLimit(quiz.timeLimit)
 
   return (
     <div
@@ -59,7 +80,6 @@ export function QuizCard({ quiz, onStart, isStarting = false }: QuizCardProps) {
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-medium uppercase tracking-wider text-white/80 backdrop-blur">
                 <span>{quiz.category.name}</span>
-                <span className="text-white/60">[{questionLabel}]</span>
               </div>
               <h3 className="text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">
                 {quiz.title}
@@ -81,28 +101,24 @@ export function QuizCard({ quiz, onStart, isStarting = false }: QuizCardProps) {
             <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-white/90 backdrop-blur">
               <Layers className="h-4 w-4 text-white" />
               <div className="space-y-0.5">
-                <span className="text-[11px] uppercase tracking-wide text-white/60">Kategori</span>
                 <span className="text-sm font-semibold leading-tight text-white">
-                  {quiz.category.name}
+                  Kategori : {quiz.category.name}
                 </span>
-                <span className="text-[11px] text-white/70">{questionLabel}</span>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-white/90 backdrop-blur">
               <Clock className="h-4 w-4 text-white" />
               <div className="space-y-0.5">
-                <span className="text-[11px] uppercase tracking-wide text-white/60">Süre Limiti</span>
                 <span className="text-sm font-semibold leading-tight text-white">
-                  {timeLimitLabel}
+                  Süre Limiti : {timeLimitLabel}
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-white/90 backdrop-blur">
               <Users className="h-4 w-4 text-white" />
               <div className="space-y-0.5">
-                <span className="text-[11px] uppercase tracking-wide text-white/60">Deneme Sayısı</span>
                 <span className="text-sm font-semibold leading-tight text-white">
-                  {attemptsLabel}
+                  Deneme Sayısı : {attemptsLabel}
                 </span>
               </div>
             </div>
@@ -112,7 +128,7 @@ export function QuizCard({ quiz, onStart, isStarting = false }: QuizCardProps) {
             type="button"
             onClick={onStart}
             disabled={isStarting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-white group-hover:translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 group-hover:translate-y-0.5 disabled:pointer-events-none disabled:opacity-70 sm:w-auto"
           >
             <Play className="h-4 w-4" />
             {isStarting ? 'Yükleniyor...' : 'Teste Başla'}
