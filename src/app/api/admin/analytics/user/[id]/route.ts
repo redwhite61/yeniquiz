@@ -5,10 +5,11 @@ function toPercentage(value: number) {
   return Math.round(value * 10) / 10
 }
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params
   try {
     const user = await db.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         quizAttempts: {
           include: {
