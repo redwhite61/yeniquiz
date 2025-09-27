@@ -622,15 +622,15 @@ export function UserManagement({ user }: UserManagementProps) {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="bg-white border border-slate-200 text-slate-900 max-w-6xl">
-                            <DialogHeader>
+                          <DialogContent className="bg-white border border-slate-200 text-slate-900 w-[95vw] max-w-none h-[90vh] flex flex-col p-0">
+                            <DialogHeader className="px-6 pt-6">
                               <DialogTitle className="text-slate-900">Kullanıcı Analizi</DialogTitle>
                               <DialogDescription className="text-slate-500">
                                 Seçili kullanıcının kategori, test ve soru bazlı performans detayları
                               </DialogDescription>
                             </DialogHeader>
                             {selectedUser && (
-                              <div className="mt-4">
+                              <div className="flex-1 overflow-y-auto px-6 pb-6">
                                 <UserAnalyticsPanel
                                   userId={selectedUser.id}
                                   fallbackName={selectedUser.name}
