@@ -62,7 +62,7 @@ export function QuizCard({ quiz, onStart, isStarting = false }: QuizCardProps) {
 
   return (
     <div
-      className="group relative flex h-72 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-900/5 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+      className="group relative flex min-h-[22rem] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-900/5 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
     >
       <div className="absolute inset-0 overflow-hidden">
         <div
@@ -126,9 +126,10 @@ export function QuizCard({ quiz, onStart, isStarting = false }: QuizCardProps) {
 
           <Button
             type="button"
+            size="lg"
             onClick={onStart}
             disabled={isStarting}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 group-hover:translate-y-0.5 disabled:pointer-events-none disabled:opacity-70 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/90 px-6 font-semibold text-slate-900 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:pointer-events-none disabled:opacity-70 sm:w-auto"
           >
             <Play className="h-4 w-4" />
             {isStarting ? 'Yükleniyor...' : 'Teste Başla'}
