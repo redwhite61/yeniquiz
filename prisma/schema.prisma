@@ -52,6 +52,7 @@ model Question {
   imageUrl    String?     // URL for question image
   points      Int         @default(1)
   difficulty  Difficulty  @default(MEDIUM)
+  allowCalculator Boolean @default(false)
   categoryId  String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

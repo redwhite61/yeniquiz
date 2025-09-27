@@ -74,7 +74,17 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const { content, type, options, correctAnswer, imageUrl, points, difficulty, categoryId } = await request.json()
+    const {
+      content,
+      type,
+      options,
+      correctAnswer,
+      imageUrl,
+      points,
+      difficulty,
+      categoryId,
+      allowCalculator
+    } = await request.json()
 
     if (!content || !categoryId || (!correctAnswer && correctAnswer !== 0 && correctAnswer !== '0')) {
       return NextResponse.json(
@@ -124,7 +134,8 @@ export async function PUT(
         imageUrl: imageUrl || null,
         points: points || 1,
         difficulty,
-        categoryId
+        categoryId,
+        allowCalculator: Boolean(allowCalculator)
       }
     })
 

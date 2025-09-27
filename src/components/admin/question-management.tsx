@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { ImageUpload } from '@/components/ui/image-upload'
-import { Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react'
+import { Plus, Edit, Trash2, Image as ImageIcon, Calculator } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,6 +43,7 @@ interface Question {
   points: number
   difficulty: 'EASY' | 'MEDIUM' | 'HARD'
   category: Category
+  allowCalculator?: boolean
 }
 
 interface QuestionFormProps {
@@ -118,11 +119,13 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
     imageFile: null as File | null,
     points: question?.points || 1,
     difficulty: question?.difficulty || 'MEDIUM',
-    categoryId: question?.category.id || ''
+    categoryId: question?.category.id || '',
+    allowCalculator: question?.allowCalculator ?? false
   })
   const [isLoading, setIsLoading] = useState(false)
   const [isImageUploading, setIsImageUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const calculatorFieldName = question ? `allowCalculator-${question.id}` : 'allowCalculator-new'
 
   const handleTypeChange = (value: Question['type']) => {
     setFormData((prev) => {
@@ -202,7 +205,8 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
         imageUrl: formData.imageUrl,
         points: formData.points,
         difficulty: formData.difficulty,
-        categoryId: formData.categoryId
+        categoryId: formData.categoryId,
+        allowCalculator: formData.allowCalculator
       }
 
       const response = await fetch(url, {
@@ -225,7 +229,8 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
           imageFile: null,
           points: 1,
           difficulty: 'MEDIUM',
-          categoryId: ''
+          categoryId: '',
+          allowCalculator: false
         })
       } else {
         const errorData = await response.json()
@@ -402,6 +407,34 @@ function QuestionForm({ question, categories, onSuccess }: QuestionFormProps) {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Hesap Makinesi</Label>
+              <div className="col-span-3 flex flex-wrap items-center gap-6">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                  <input
+                    type="radio"
+                    name={calculatorFieldName}
+                    value="true"
+                    checked={formData.allowCalculator === true}
+                    onChange={() => setFormData((prev) => ({ ...prev, allowCalculator: true }))}
+                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Evet</span>
+                </label>
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                  <input
+                    type="radio"
+                    name={calculatorFieldName}
+                    value="false"
+                    checked={formData.allowCalculator === false}
+                    onChange={() => setFormData((prev) => ({ ...prev, allowCalculator: false }))}
+                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Hayır</span>
+                </label>
+              </div>
             </div>
 
             {formData.type !== 'TEXT' && (
@@ -763,6 +796,12 @@ export function QuestionManagement({ user }: QuestionManagementProps) {
                       <Badge variant="secondary" className="rounded-full border-slate-200 bg-white text-slate-700">
                         {question.points} Puan
                       </Badge>
+                      {question.allowCalculator && (
+                        <Badge className="inline-flex items-center gap-1 rounded-full border-emerald-100 bg-emerald-50 text-emerald-700">
+                          <Calculator className="h-3.5 w-3.5" />
+                          Hesap Makinesi
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

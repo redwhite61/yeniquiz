@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
-import { Clock, ChevronLeft, ChevronRight, Flag, ZoomIn } from 'lucide-react'
+import { Clock, ChevronLeft, ChevronRight, Flag, ZoomIn, X } from 'lucide-react'
 import { normalizeImageUrl, getFallbackImageUrl } from '@/lib/image-utils'
 import { ImageModal } from '@/components/ui/image-modal'
 import { toast } from '@/hooks/use-toast'
@@ -23,6 +23,7 @@ interface Question {
   imageUrl?: string
   points: number
   difficulty: 'EASY' | 'MEDIUM' | 'HARD'
+  allowCalculator?: boolean
 }
 
 interface Quiz {
@@ -68,9 +69,12 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedImageUrl, setSelectedImageUrl] = useState('')
   const [selectedImageAlt, setSelectedImageAlt] = useState('')
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
+  const [calculatorExpression, setCalculatorExpression] = useState('0')
 
   const currentQuestion = quiz.questions[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100
+  const calculatorEnabled = Boolean(currentQuestion?.allowCalculator)
 
   const normalizedQuestionImage = normalizeImageUrl(currentQuestion.imageUrl || '')
   const normalizedOptions = (() => {
@@ -91,6 +95,15 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
 
     return []
   })()
+
+  useEffect(() => {
+    if (calculatorEnabled) {
+      setIsCalculatorOpen(true)
+    } else {
+      setIsCalculatorOpen(false)
+    }
+    setCalculatorExpression('0')
+  }, [currentQuestion.id, calculatorEnabled])
 
   useEffect(() => {
     if (timeLeft === null) return
@@ -171,6 +184,90 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
     setSelectedImageAlt('')
   }
 
+  const appendToExpression = (value: string) => {
+    const operators = ['+', '-', '*', '/']
+    setCalculatorExpression((prev) => {
+      const current = prev || '0'
+
+      if (operators.includes(value)) {
+        const lastChar = current.slice(-1)
+        if (operators.includes(lastChar)) {
+          return current.slice(0, -1) + value
+        }
+        return current + value
+      }
+
+      if (value === '.') {
+        const segments = current.split(/[-+*/]/)
+        const lastSegment = segments[segments.length - 1]
+        if (lastSegment.includes('.')) {
+          return current
+        }
+
+        if (operators.includes(current.slice(-1))) {
+          return current + '0.'
+        }
+
+        return current === '' ? '0.' : current + value
+      }
+
+      if (current === '0') {
+        return value
+      }
+
+      return current + value
+    })
+  }
+
+  const clearCalculator = () => {
+    setCalculatorExpression('0')
+  }
+
+  const removeLastCharacter = () => {
+    setCalculatorExpression((prev) => {
+      if (!prev || prev.length <= 1) {
+        return '0'
+      }
+      const next = prev.slice(0, -1)
+      return next === '' ? '0' : next
+    })
+  }
+
+  const evaluateCalculator = () => {
+    setCalculatorExpression((prev) => {
+      const sanitized = prev.replace(/[^0-9+\-*/.()]/g, '')
+
+      if (!sanitized.trim()) {
+        return '0'
+      }
+
+      try {
+        const result = Function(`"use strict"; return (${sanitized})`)()
+        if (typeof result === 'number' && Number.isFinite(result)) {
+          const formatted = Number.isInteger(result)
+            ? result.toString()
+            : parseFloat(result.toFixed(6)).toString()
+          return formatted
+        }
+
+        toast({
+          title: 'Hesaplama hatası',
+          description: 'Lütfen ifadeyi kontrol edin.',
+          variant: 'destructive'
+        })
+        return prev
+      } catch (error) {
+        console.error('Calculator evaluation error:', error)
+        toast({
+          title: 'Hesaplama hatası',
+          description: 'Lütfen ifadeyi kontrol edin.',
+          variant: 'destructive'
+        })
+        return prev
+      }
+    })
+  }
+
   const handleManualSubmit = () => {
     const answeredCount = getAnsweredCount()
 
@@ -206,8 +303,177 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
   const difficultyBadge = getDifficultyBadge(currentQuestion.difficulty)
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <>
+      {calculatorEnabled && isCalculatorOpen && (
+        <div className="fixed right-4 top-24 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+              <span aria-hidden="true" className="text-lg leading-none">🧮</span>
+              Hesap Makinesi
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCalculatorOpen(false)}
+              className="text-slate-500 hover:text-slate-900"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Hesap makinesini kapat</span>
+            </Button>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-900/90 p-3 text-right text-2xl font-semibold text-white shadow-inner">
+            <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{calculatorExpression}</span>
+          </div>
+          <div className="mt-3 grid grid-cols-4 gap-2 text-base font-semibold">
+            <Button
+              type="button"
+              onClick={clearCalculator}
+              className="col-span-2 h-12 rounded-lg border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
+              variant="outline"
+            >
+              C
+            </Button>
+            <Button
+              type="button"
+              onClick={removeLastCharacter}
+              className="h-12 rounded-lg border-slate-200 text-slate-700 hover:bg-slate-100"
+              variant="outline"
+            >
+              ⌫
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('/')}
+              className="h-12 rounded-lg border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
+              variant="outline"
+            >
+              ÷
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('7')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              7
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('8')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              8
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('9')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              9
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('*')}
+              className="h-12 rounded-lg border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
+              variant="outline"
+            >
+              ×
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('4')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              4
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('5')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              5
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('6')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              6
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('-')}
+              className="h-12 rounded-lg border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
+              variant="outline"
+            >
+              −
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('1')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              1
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('2')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              2
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('3')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              3
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('+')}
+              className="h-12 rounded-lg border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100"
+              variant="outline"
+            >
+              +
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('0')}
+              className="col-span-2 h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              0
+            </Button>
+            <Button
+              type="button"
+              onClick={() => appendToExpression('.')}
+              className="h-12 rounded-lg border-slate-200 text-slate-800 hover:bg-slate-100"
+              variant="outline"
+            >
+              .
+            </Button>
+            <Button
+              type="button"
+              onClick={evaluateCalculator}
+              className="h-12 rounded-lg border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600"
+            >
+              =
+            </Button>
+          </div>
+        </div>
+      )}
+      <div className="min-h-screen bg-slate-50 text-slate-900">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <Card className="w-full border border-slate-200 bg-white shadow-sm">
             <CardHeader className="flex flex-col gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -278,18 +544,43 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
                   <Badge variant="outline" className="border-slate-200 text-slate-600 font-medium">
                     Soru {currentQuestionIndex + 1}
                   </Badge>
-                  <Button
-                    variant={flaggedQuestions.has(currentQuestion.id) ? 'default' : 'outline'}
-                    onClick={() => toggleFlag(currentQuestion.id)}
-                    className={`ml-auto inline-flex items-center gap-2 ${
-                      flaggedQuestions.has(currentQuestion.id)
-                        ? 'bg-amber-500 text-white hover:bg-amber-600'
-                        : 'border-slate-200 text-slate-700 hover:border-amber-200 hover:text-amber-600'
-                    }`}
-                  >
-                    <Flag className="h-4 w-4" />
-                    {flaggedQuestions.has(currentQuestion.id) ? 'İşaretlendi' : 'İşaretle'}
-                  </Button>
+                  <div className="ml-auto flex items-center gap-2">
+                    {calculatorEnabled && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsCalculatorOpen((prev) => !prev)}
+                        aria-pressed={isCalculatorOpen}
+                        title="Hesap makinesi"
+                        className={`rounded-full border transition ${
+                          isCalculatorOpen
+                            ? 'border-blue-500 bg-blue-600 text-white hover:bg-blue-600'
+                            : 'border-slate-200 text-slate-700 hover:border-blue-200 hover:text-blue-600'
+                        }`}
+                      >
+                        <span aria-hidden="true" className="text-lg leading-none">
+                          🧮
+                        </span>
+                        <span className="sr-only">
+                          Hesap makinesini {isCalculatorOpen ? 'kapat' : 'aç'}
+                        </span>
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant={flaggedQuestions.has(currentQuestion.id) ? 'default' : 'outline'}
+                      onClick={() => toggleFlag(currentQuestion.id)}
+                      className={`inline-flex items-center gap-2 ${
+                        flaggedQuestions.has(currentQuestion.id)
+                          ? 'bg-amber-500 text-white hover:bg-amber-600'
+                          : 'border-slate-200 text-slate-700 hover:border-amber-200 hover:text-amber-600'
+                      }`}
+                    >
+                      <Flag className="h-4 w-4" />
+                      {flaggedQuestions.has(currentQuestion.id) ? 'İşaretlendi' : 'İşaretle'}
+                    </Button>
+                  </div>
                 </div>
                 <CardTitle className="text-xl font-semibold leading-relaxed text-slate-900 sm:text-2xl">
                   {currentQuestion.content}
@@ -565,9 +856,10 @@ export function QuizTaking({ quiz, onComplete, onExit }: QuizTakingProps) {
             </CardContent>
           </Card>
         </div>
+        </div>
       </div>
 
       <ImageModal isOpen={isModalOpen} onClose={closeImageModal} imageUrl={selectedImageUrl} alt={selectedImageAlt} />
-    </div>
+    </>
   )
 }

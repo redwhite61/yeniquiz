@@ -66,7 +66,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { content, type, options, correctAnswer, imageUrl, points, difficulty, categoryId } = await request.json()
+    const {
+      content,
+      type,
+      options,
+      correctAnswer,
+      imageUrl,
+      points,
+      difficulty,
+      categoryId,
+      allowCalculator
+    } = await request.json()
 
     if (!content || !categoryId || (!correctAnswer && correctAnswer !== 0 && correctAnswer !== '0')) {
       return NextResponse.json(
@@ -115,7 +125,8 @@ export async function POST(request: NextRequest) {
         imageUrl: imageUrl || null,
         points: points || 1,
         difficulty: difficulty || 'MEDIUM',
-        categoryId
+        categoryId,
+        allowCalculator: Boolean(allowCalculator)
       },
       include: {
         category: true
