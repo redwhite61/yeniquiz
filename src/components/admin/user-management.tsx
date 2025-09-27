@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { UserAnalyticsPanel } from '@/components/admin/user-analytics-panel'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Users, 
@@ -621,71 +622,20 @@ export function UserManagement({ user }: UserManagementProps) {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="bg-white border border-slate-200 text-slate-900 max-w-md">
+                          <DialogContent className="bg-white border border-slate-200 text-slate-900 max-w-5xl">
                             <DialogHeader>
-                              <DialogTitle className="text-slate-900">Kullanıcı Detayları</DialogTitle>
+                              <DialogTitle className="text-slate-900">Kullanıcı Analizi</DialogTitle>
+                              <DialogDescription className="text-slate-500">
+                                Seçili kullanıcının kategori, test ve soru bazlı performans detayları
+                              </DialogDescription>
                             </DialogHeader>
                             {selectedUser && (
-                              <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                                    <span className="text-white text-lg font-medium">
-                                      {selectedUser.name?.charAt(0) || selectedUser.email.charAt(0)}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-slate-900">
-                                      {selectedUser.name || 'İsimsiz Kullanıcı'}
-                                    </div>
-                                    <div className="text-sm text-slate-500">{selectedUser.email}</div>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <div className="text-sm text-slate-500">Rol</div>
-                                    <Badge className={getRoleBadgeColor(selectedUser.role)}>
-                                      {selectedUser.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
-                                    </Badge>
-                                  </div>
-                                  <div>
-                                    <div className="text-sm text-slate-500">Durum</div>
-                                    <Badge className={getStatusBadgeColor(selectedUser.isActive)}>
-                                      {selectedUser.isActive ? 'Aktif' : 'Pasif'}
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <div className="text-sm text-slate-500">Toplam Test</div>
-                                    <div className="text-slate-900 font-medium">{selectedUser.stats.totalQuizzes}</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-sm text-slate-500">Tamamlanan</div>
-                                    <div className="text-slate-900 font-medium">{selectedUser.stats.completedTests}</div>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <div className="text-sm text-slate-500">Toplam Puan</div>
-                                    <div className="text-slate-900 font-medium">{selectedUser.stats.totalScore}</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-sm text-slate-500">Başarı Oranı</div>
-                                    <div className={`font-medium ${getPerformanceColor(selectedUser.stats.averagePercentage)}`}>
-                                      {selectedUser.stats.averagePercentage.toFixed(1)}%
-                                    </div>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="text-sm text-slate-500">Kayıt Tarihi</div>
-                                  <div className="text-slate-900">{formatDate(selectedUser.createdAt)}</div>
-                                </div>
-                                {selectedUser.lastLogin && (
-                                  <div>
-                                    <div className="text-sm text-slate-500">Son Giriş</div>
-                                    <div className="text-slate-900">{formatDate(selectedUser.lastLogin)}</div>
-                                  </div>
-                                )}
+                              <div className="mt-4">
+                                <UserAnalyticsPanel
+                                  userId={selectedUser.id}
+                                  fallbackName={selectedUser.name}
+                                  email={selectedUser.email}
+                                />
                               </div>
                             )}
                           </DialogContent>

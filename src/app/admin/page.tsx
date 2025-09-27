@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -11,20 +11,16 @@ import { CategoryManagement } from '@/components/admin/category-management'
 import { QuestionManagement } from '@/components/admin/question-management'
 import { QuizManagement } from '@/components/admin/quiz-management'
 import { UserManagement } from '@/components/admin/user-management'
-import { 
-  Settings, 
-  Users, 
-  BookOpen, 
-  HelpCircle, 
+import { DashboardOverview } from '@/components/admin/dashboard-overview'
+import {
+  Settings,
+  HelpCircle,
   Menu,
   X,
   Home,
-  BarChart3,
   Trophy,
   User,
   LogOut,
-  ChevronDown,
-  LayoutDashboard,
   Database,
   FileText,
   Users as UsersIcon,
@@ -34,38 +30,7 @@ import {
 export default function AdminPage() {
   const { user, isLoading: authLoading } = useAuth()
   const [activeTab, setActiveTab] = useState('categories')
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalCategories: 0,
-    totalQuestions: 0,
-    totalQuizzes: 0,
-    totalAttempts: 0,
-    activeUsers: 0
-  })
-  const [isLoading, setIsLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  const fetchStats = async () => {
-    try {
-      const response = await fetch('/api/admin/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!authLoading && user && user.role === 'ADMIN') {
-      fetchStats()
-    } else if (!authLoading) {
-      setIsLoading(false)
-    }
-  }, [authLoading, user])
 
   if (authLoading) {
     return (
@@ -313,67 +278,8 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Toplam Kullanıcı</CardTitle>
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                <UsersIcon className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-900">
-                {isLoading ? '-' : stats.totalUsers}
-              </div>
-              <p className="text-xs text-slate-500">Kayıtlı kullanıcı</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Kategoriler</CardTitle>
-              <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
-                <BookOpen className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-900">
-                {isLoading ? '-' : stats.totalCategories}
-              </div>
-              <p className="text-xs text-slate-500">Aktif kategori</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Sorular</CardTitle>
-              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
-                <HelpCircle className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-900">
-                {isLoading ? '-' : stats.totalQuestions}
-              </div>
-              <p className="text-xs text-slate-500">Toplam soru</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-500">Testler</CardTitle>
-              <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
-                <FileText className="h-4 w-4" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold text-slate-900">
-                {isLoading ? '-' : stats.totalQuizzes}
-              </div>
-              <p className="text-xs text-slate-500">Aktif test</p>
-            </CardContent>
-          </Card>
+        <div className="mb-12">
+          <DashboardOverview />
         </div>
 
         {/* Management Tabs */}
