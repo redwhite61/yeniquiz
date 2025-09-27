@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { title, description, categoryId, timeLimit, questionIds } = await request.json()
+    const { title, description, categoryId, timeLimit, questionIds, image } = await request.json()
 
     if (!title || !categoryId) {
       return NextResponse.json(
@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
         title,
         description,
         categoryId,
-        timeLimit
+        timeLimit,
+        image: image || null
       }
     })
 

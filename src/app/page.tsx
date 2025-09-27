@@ -13,6 +13,7 @@ import { NotificationPanel } from '@/components/notification-panel'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import CategoryCard from '@/components/category-card'
+import { QuizCard } from '@/components/quiz-card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +64,7 @@ interface Quiz {
   description?: string
   timeLimit?: number
   categoryId: string
+  image?: string | null
   category: {
     name: string
     color?: string
@@ -857,51 +859,12 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {filteredQuizzes.map((quiz) => (
-                  <Card
+                  <QuizCard
                     key={quiz.id}
-                    className="bg-white border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-200"
-                  >
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-slate-900">{quiz.title}</CardTitle>
-                        <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100">
-                          {quiz._count.questions} soru
-                        </Badge>
-                      </div>
-                      {quiz.description && (
-                        <CardDescription className="text-slate-500">
-                          {quiz.description}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-500">Kategori</span>
-                          <Badge variant="outline" className="border-blue-100 text-blue-600">
-                            {quiz.category.name}
-                          </Badge>
-                        </div>
-                        {quiz.timeLimit && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-slate-500">Süre Limiti</span>
-                            <span className="text-slate-900">{quiz.timeLimit} dakika</span>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-500">Deneme Sayısı</span>
-                          <span className="text-slate-900">{quiz._count.attempts}</span>
-                        </div>
-                        <button
-                          onClick={() => startQuiz(quiz.id)}
-                          disabled={isLoading}
-                          className="inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-50 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2"
-                        >
-                          {isLoading ? 'Yükleniyor...' : 'Teste Başla'}
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    quiz={quiz}
+                    onStart={() => startQuiz(quiz.id)}
+                    isStarting={isLoading}
+                  />
                 ))}
               </div>
             </div>

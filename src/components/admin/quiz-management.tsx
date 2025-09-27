@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, type ChangeEvent } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,6 +50,7 @@ interface Quiz {
   description?: string
   timeLimit?: number
   categoryId: string
+  image?: string | null
   category: {
     name: string
     color?: string
@@ -71,6 +72,7 @@ interface QuizFormData {
   timeLimit?: number
   categoryId: string
   questionIds: string[]
+  image?: string
 }
 
 export function QuizManagement({ user }: { user: any }) {
@@ -85,13 +87,16 @@ export function QuizManagement({ user }: { user: any }) {
   const { toast } = useToast()
   const [deleteTarget, setDeleteTarget] = useState<Quiz | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<QuizFormData>({
     title: '',
     description: '',
     timeLimit: undefined,
     categoryId: '',
-    questionIds: []
+    questionIds: [],
+    image: ''
   })
 
   const fetchCategories = async () => {
@@ -167,11 +172,47 @@ export function QuizManagement({ user }: { user: any }) {
       description: '',
       timeLimit: undefined,
       categoryId: '',
-      questionIds: []
+      questionIds: [],
+      image: ''
     })
     setSelectedQuestions([])
     setEditingQuiz(null)
     setError(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleClearImage = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setImagePreview(null)
+    setFormData(prev => ({
+      ...prev,
+      image: ''
+    }))
+  }
+
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      handleClearImage()
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      setFormData(prev => ({
+        ...prev,
+        image: result
+      }))
+      setImagePreview(result || null)
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -200,7 +241,8 @@ export function QuizManagement({ user }: { user: any }) {
 
       const payload = {
         ...formData,
-        questionIds: selectedQuestions
+        questionIds: selectedQuestions,
+        image: formData.image || null
       }
 
       const response = await fetch(url, {
@@ -244,9 +286,14 @@ export function QuizManagement({ user }: { user: any }) {
           description: fullQuiz.description || '',
           timeLimit: fullQuiz.timeLimit,
           categoryId: fullQuiz.categoryId,
-          questionIds: fullQuiz.questions.map(q => q.question.id)
+          questionIds: fullQuiz.questions.map(q => q.question.id),
+          image: fullQuiz.image || ''
         })
         setSelectedQuestions(fullQuiz.questions.map(q => q.question.id))
+        setImagePreview(fullQuiz.image ?? null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
         setIsDialogOpen(true)
       } else {
         toast({
@@ -377,6 +424,43 @@ export function QuizManagement({ user }: { user: any }) {
                   rows={3}
                   className="border-slate-200 text-slate-900 placeholder-slate-400"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="quiz-image" className="text-slate-600">Test Görseli</Label>
+                <div className="space-y-3">
+                  <Input
+                    ref={fileInputRef}
+                    id="quiz-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="border-slate-200 bg-white file:mr-3 file:rounded-md file:border file:border-slate-200 file:bg-slate-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-600 hover:file:bg-slate-100"
+                  />
+                  {imagePreview ? (
+                    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                      <img
+                        src={imagePreview}
+                        alt="Test görseli önizlemesi"
+                        className="h-40 w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-slate-900/10" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearImage}
+                        className="absolute right-3 top-3 bg-white/90 text-slate-600 hover:bg-white"
+                      >
+                        Görseli Kaldır
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500">
+                      Test kartınızda kullanılacak görseli yükleyin. (PNG, JPG)
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

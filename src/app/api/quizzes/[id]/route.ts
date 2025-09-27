@@ -52,7 +52,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const { title, description, categoryId, timeLimit, questionIds } = await request.json()
+    const { title, description, categoryId, timeLimit, questionIds, image } = await request.json()
 
     if (!title || !categoryId) {
       return NextResponse.json(
@@ -80,7 +80,8 @@ export async function PUT(
         title,
         description,
         categoryId,
-        timeLimit
+        timeLimit,
+        image: image || null
       }
     })
 
