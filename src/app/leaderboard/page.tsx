@@ -247,21 +247,6 @@ export default function LeaderboardPage() {
           </div>
 
           <div className="flex items-center gap-3 md:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm">
-              {user.avatar ? (
-                <img
-                  src={`${user.avatar}?t=${Date.now()}`}
-                  alt="Profil resmi"
-                  className="h-9 w-9 rounded-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = ''
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-              ) : (
-                <User className="h-5 w-5 text-slate-400" />
-              )}
-            </div>
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-blue-200 hover:text-blue-700"
