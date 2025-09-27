@@ -214,25 +214,25 @@ export function UserManagement({ user }: UserManagementProps) {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'bg-red-500/20 text-red-400 border-red-500/50'
+        return 'bg-rose-50 text-rose-600 border border-rose-100'
       case 'STUDENT':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/50'
+        return 'bg-blue-50 text-blue-600 border border-blue-100'
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/50'
+        return 'bg-slate-100 text-slate-600 border border-slate-200'
     }
   }
 
   const getStatusBadgeColor = (isActive: boolean) => {
-    return isActive 
-      ? 'bg-green-500/20 text-green-400 border-green-500/50'
-      : 'bg-red-500/20 text-red-400 border-red-500/50'
+    return isActive
+      ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+      : 'bg-rose-50 text-rose-600 border border-rose-100'
   }
 
   const getPerformanceColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-400'
-    if (percentage >= 70) return 'text-blue-400'
-    if (percentage >= 50) return 'text-yellow-400'
-    return 'text-red-400'
+    if (percentage >= 90) return 'text-emerald-600'
+    if (percentage >= 70) return 'text-blue-600'
+    if (percentage >= 50) return 'text-amber-600'
+    return 'text-rose-600'
   }
 
   const toggleUserStatus = async (userId: string) => {
@@ -365,7 +365,7 @@ export function UserManagement({ user }: UserManagementProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500"></div>
       </div>
     )
   }
@@ -374,138 +374,138 @@ export function UserManagement({ user }: UserManagementProps) {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Toplam Kullanıcı</CardTitle>
-            <div className="p-2 bg-blue-600/20 rounded-lg">
-              <Users className="h-4 w-4 text-blue-400" />
+            <CardTitle className="text-sm font-medium text-slate-500">Toplam Kullanıcı</CardTitle>
+            <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+              <Users className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{stats.totalUsers}</div>
-            <p className="text-xs text-slate-400">Kayıtlı kullanıcı</p>
+            <div className="text-2xl font-semibold text-slate-900">{stats.totalUsers}</div>
+            <p className="text-xs text-slate-500">Kayıtlı kullanıcı</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Aktif Kullanıcı</CardTitle>
-            <div className="p-2 bg-green-600/20 rounded-lg">
-              <UserCheck className="h-4 w-4 text-green-400" />
+            <CardTitle className="text-sm font-medium text-slate-500">Aktif Kullanıcı</CardTitle>
+            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+              <UserCheck className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">{stats.activeUsers}</div>
-            <p className="text-xs text-slate-400">Aktif hesap</p>
+            <div className="text-2xl font-semibold text-slate-900">{stats.activeUsers}</div>
+            <p className="text-xs text-slate-500">Aktif hesap</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Admin</CardTitle>
-            <div className="p-2 bg-red-600/20 rounded-lg">
-              <Shield className="h-4 w-4 text-red-400" />
+            <CardTitle className="text-sm font-medium text-slate-500">Admin</CardTitle>
+            <div className="p-2 bg-rose-50 rounded-lg text-rose-600">
+              <Shield className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">{stats.adminUsers}</div>
-            <p className="text-xs text-slate-400">Yönetici</p>
+            <div className="text-2xl font-semibold text-slate-900">{stats.adminUsers}</div>
+            <p className="text-xs text-slate-500">Yönetici</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Öğrenci</CardTitle>
-            <div className="p-2 bg-purple-600/20 rounded-lg">
-              <BookOpen className="h-4 w-4 text-purple-400" />
+            <CardTitle className="text-sm font-medium text-slate-500">Öğrenci</CardTitle>
+            <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+              <BookOpen className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{stats.studentUsers}</div>
-            <p className="text-xs text-slate-400">Öğrenci</p>
+            <div className="text-2xl font-semibold text-slate-900">{stats.studentUsers}</div>
+            <p className="text-xs text-slate-500">Öğrenci</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Ortalama Başarı</CardTitle>
-            <div className="p-2 bg-orange-600/20 rounded-lg">
-              <TrendingUp className="h-4 w-4 text-orange-400" />
+            <CardTitle className="text-sm font-medium text-slate-500">Ortalama Başarı</CardTitle>
+            <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+              <TrendingUp className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getPerformanceColor(stats.averageScore)}`}>
+            <div className={`text-2xl font-semibold ${getPerformanceColor(stats.averageScore)}`}>
               {stats.averageScore}%
             </div>
-            <p className="text-xs text-slate-400">Genel ortalama</p>
+            <p className="text-xs text-slate-500">Genel ortalama</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters and Actions */}
-      <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+      <Card className="bg-white border border-slate-200 shadow-sm">
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-white">Kullanıcı Listesi</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-slate-900">Kullanıcı Listesi</CardTitle>
+              <CardDescription className="text-slate-500">
                 Tüm kullanıcıları görüntüleyin ve yönetin
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button 
+              <Button
                 onClick={refreshUsers}
                 disabled={refreshing}
                 variant="outline"
-                className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                className="border-slate-200 text-slate-600 hover:bg-slate-100"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                 Yenile
               </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white border-0">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 <UserPlus className="h-4 w-4 mr-2" />
                 Yeni Kullanıcı
               </Button>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                  <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-100">
                     <TrendingUp className="h-4 w-4 mr-2" />
                     İstatistikler
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700/50 text-white max-w-2xl">
+                <DialogContent className="bg-white border border-slate-200 max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-white">Kullanıcı İstatistikleri</DialogTitle>
-                    <DialogDescription className="text-slate-400">
+                    <DialogTitle className="text-slate-900">Kullanıcı İstatistikleri</DialogTitle>
+                    <DialogDescription className="text-slate-500">
                       Platformdaki kullanıcıların genel istatistikleri
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600/50">
-                      <div className="text-2xl font-bold text-white mb-1">{stats.totalUsers}</div>
-                      <div className="text-sm text-slate-400">Toplam Kullanıcı</div>
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <div className="text-2xl font-semibold text-blue-700 mb-1">{stats.totalUsers}</div>
+                      <div className="text-sm text-slate-500">Toplam Kullanıcı</div>
                     </div>
-                    <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600/50">
-                      <div className="text-2xl font-bold text-green-400 mb-1">{stats.activeUsers}</div>
-                      <div className="text-sm text-slate-400">Aktif Kullanıcı</div>
+                    <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                      <div className="text-2xl font-semibold text-emerald-700 mb-1">{stats.activeUsers}</div>
+                      <div className="text-sm text-slate-500">Aktif Kullanıcı</div>
                     </div>
-                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="text-2xl font-bold text-blue-400 mb-1">{stats.studentUsers}</div>
-                      <div className="text-sm text-blue-300">Öğrenci</div>
+                    <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                      <div className="text-2xl font-semibold text-indigo-700 mb-1">{stats.studentUsers}</div>
+                      <div className="text-sm text-slate-500">Öğrenci</div>
                     </div>
-                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="text-2xl font-bold text-red-400 mb-1">{stats.adminUsers}</div>
-                      <div className="text-sm text-blue-300">Admin</div>
+                    <div className="p-4 bg-rose-50 rounded-lg border border-rose-100">
+                      <div className="text-2xl font-semibold text-rose-700 mb-1">{stats.adminUsers}</div>
+                      <div className="text-sm text-slate-500">Admin</div>
                     </div>
-                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="text-2xl font-bold text-purple-400 mb-1">{stats.totalQuizzes}</div>
-                      <div className="text-sm text-blue-300">Toplam Test</div>
+                    <div className="p-4 bg-violet-50 rounded-lg border border-violet-100">
+                      <div className="text-2xl font-semibold text-violet-700 mb-1">{stats.totalQuizzes}</div>
+                      <div className="text-sm text-slate-500">Toplam Test</div>
                     </div>
-                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className={`text-2xl font-bold ${getPerformanceColor(stats.averageScore)} mb-1`}>
+                    <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                      <div className={`text-2xl font-semibold ${getPerformanceColor(stats.averageScore)} mb-1`}>
                         {stats.averageScore}%
                       </div>
-                      <div className="text-sm text-blue-300">Ortalama Başarı</div>
+                      <div className="text-sm text-slate-500">Ortalama Başarı</div>
                     </div>
                   </div>
                 </DialogContent>
@@ -516,30 +516,30 @@ export function UserManagement({ user }: UserManagementProps) {
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blue-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Kullanıcı ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-400 focus:border-blue-500 focus:ring-blue-500"
+                className="pl-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-200"
               />
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full sm:w-[180px] bg-white/10 border-white/20 text-white focus:border-blue-500 focus:ring-blue-500">
+              <SelectTrigger className="w-full sm:w-[180px] bg-white border-slate-200 text-slate-600 focus:border-blue-500 focus:ring-blue-200">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Rol" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/20">
+              <SelectContent className="bg-white border border-slate-200">
                 <SelectItem value="all">Tüm Roller</SelectItem>
                 <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="STUDENT">Öğrenci</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px] bg-white/10 border-white/20 text-white focus:border-blue-500 focus:ring-blue-500">
+              <SelectTrigger className="w-full sm:w-[180px] bg-white border-slate-200 text-slate-600 focus:border-blue-500 focus:ring-blue-200">
                 <SelectValue placeholder="Durum" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/20">
+              <SelectContent className="bg-white border border-slate-200">
                 <SelectItem value="all">Tüm Durumlar</SelectItem>
                 <SelectItem value="active">Aktif</SelectItem>
                 <SelectItem value="inactive">Pasif</SelectItem>
@@ -548,33 +548,33 @@ export function UserManagement({ user }: UserManagementProps) {
           </div>
 
           {/* Users Table */}
-          <div className="rounded-lg border border-slate-700/50 overflow-hidden">
+          <div className="rounded-lg border border-slate-200 overflow-hidden bg-white">
             <Table>
-              <TableHeader className="bg-slate-700/50">
+              <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="text-slate-300">Kullanıcı</TableHead>
-                  <TableHead className="text-slate-300">Rol</TableHead>
-                  <TableHead className="text-slate-300">Durum</TableHead>
-                  <TableHead className="text-slate-300">İstatistikler</TableHead>
-                  <TableHead className="text-slate-300">Kayıt Tarihi</TableHead>
-                  <TableHead className="text-slate-300 text-right">İşlemler</TableHead>
+                  <TableHead className="text-slate-500">Kullanıcı</TableHead>
+                  <TableHead className="text-slate-500">Rol</TableHead>
+                  <TableHead className="text-slate-500">Durum</TableHead>
+                  <TableHead className="text-slate-500">İstatistikler</TableHead>
+                  <TableHead className="text-slate-500">Kayıt Tarihi</TableHead>
+                  <TableHead className="text-slate-500 text-right">İşlemler</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((userItem) => (
-                  <TableRow key={userItem.id} className="border-slate-700/50 hover:bg-slate-700/30">
+                  <TableRow key={userItem.id} className="border-slate-200 hover:bg-slate-50">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center ring-2 ring-white/20">
-                          <span className="text-white text-sm font-medium">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                          <span className="text-sm font-medium">
                             {userItem.name?.charAt(0) || userItem.email.charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <div className="font-medium text-white">
+                          <div className="font-medium text-slate-900">
                             {userItem.name || 'İsimsiz Kullanıcı'}
                           </div>
-                          <div className="text-sm text-slate-400 flex items-center gap-1">
+                          <div className="text-sm text-slate-500 flex items-center gap-1">
                             <Mail className="h-3 w-3" />
                             {userItem.email}
                           </div>
@@ -592,9 +592,9 @@ export function UserManagement({ user }: UserManagementProps) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        <div className="flex items-center gap-2 text-white">
-                          <BookOpen className="h-3 w-3 text-blue-400" />
+                      <div className="text-sm text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-3 w-3 text-blue-500" />
                           <span>{userItem.stats.totalQuizzes} test</span>
                         </div>
                         <div className={`flex items-center gap-1 ${getPerformanceColor(userItem.stats.averagePercentage)}`}>
@@ -604,7 +604,7 @@ export function UserManagement({ user }: UserManagementProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm text-slate-400">
+                      <div className="text-sm text-slate-500">
                         {formatDate(userItem.createdAt)}
                       </div>
                     </TableCell>
@@ -615,15 +615,15 @@ export function UserManagement({ user }: UserManagementProps) {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-blue-400 hover:text-blue-300 hover:bg-blue-600/20"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                               onClick={() => setSelectedUser(userItem)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700/50 text-white max-w-md">
+                          <DialogContent className="bg-white border border-slate-200 text-slate-900 max-w-md">
                             <DialogHeader>
-                              <DialogTitle className="text-white">Kullanıcı Detayları</DialogTitle>
+                              <DialogTitle className="text-slate-900">Kullanıcı Detayları</DialogTitle>
                             </DialogHeader>
                             {selectedUser && (
                               <div className="space-y-4">
@@ -634,21 +634,21 @@ export function UserManagement({ user }: UserManagementProps) {
                                     </span>
                                   </div>
                                   <div>
-                                    <div className="font-medium text-white">
+                                    <div className="font-medium text-slate-900">
                                       {selectedUser.name || 'İsimsiz Kullanıcı'}
                                     </div>
-                                    <div className="text-sm text-blue-300">{selectedUser.email}</div>
+                                    <div className="text-sm text-slate-500">{selectedUser.email}</div>
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <div className="text-sm text-blue-300">Rol</div>
+                                    <div className="text-sm text-slate-500">Rol</div>
                                     <Badge className={getRoleBadgeColor(selectedUser.role)}>
                                       {selectedUser.role === 'ADMIN' ? 'Admin' : 'Öğrenci'}
                                     </Badge>
                                   </div>
                                   <div>
-                                    <div className="text-sm text-blue-300">Durum</div>
+                                    <div className="text-sm text-slate-500">Durum</div>
                                     <Badge className={getStatusBadgeColor(selectedUser.isActive)}>
                                       {selectedUser.isActive ? 'Aktif' : 'Pasif'}
                                     </Badge>
@@ -656,34 +656,34 @@ export function UserManagement({ user }: UserManagementProps) {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <div className="text-sm text-blue-300">Toplam Test</div>
-                                    <div className="text-white font-medium">{selectedUser.stats.totalQuizzes}</div>
+                                    <div className="text-sm text-slate-500">Toplam Test</div>
+                                    <div className="text-slate-900 font-medium">{selectedUser.stats.totalQuizzes}</div>
                                   </div>
                                   <div>
-                                    <div className="text-sm text-blue-300">Tamamlanan</div>
-                                    <div className="text-white font-medium">{selectedUser.stats.completedTests}</div>
+                                    <div className="text-sm text-slate-500">Tamamlanan</div>
+                                    <div className="text-slate-900 font-medium">{selectedUser.stats.completedTests}</div>
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <div className="text-sm text-blue-300">Toplam Puan</div>
-                                    <div className="text-white font-medium">{selectedUser.stats.totalScore}</div>
+                                    <div className="text-sm text-slate-500">Toplam Puan</div>
+                                    <div className="text-slate-900 font-medium">{selectedUser.stats.totalScore}</div>
                                   </div>
                                   <div>
-                                    <div className="text-sm text-blue-300">Başarı Oranı</div>
+                                    <div className="text-sm text-slate-500">Başarı Oranı</div>
                                     <div className={`font-medium ${getPerformanceColor(selectedUser.stats.averagePercentage)}`}>
                                       {selectedUser.stats.averagePercentage.toFixed(1)}%
                                     </div>
                                   </div>
                                 </div>
                                 <div>
-                                  <div className="text-sm text-blue-300">Kayıt Tarihi</div>
-                                  <div className="text-white">{formatDate(selectedUser.createdAt)}</div>
+                                  <div className="text-sm text-slate-500">Kayıt Tarihi</div>
+                                  <div className="text-slate-900">{formatDate(selectedUser.createdAt)}</div>
                                 </div>
                                 {selectedUser.lastLogin && (
                                   <div>
-                                    <div className="text-sm text-blue-300">Son Giriş</div>
-                                    <div className="text-white">{formatDate(selectedUser.lastLogin)}</div>
+                                    <div className="text-sm text-slate-500">Son Giriş</div>
+                                    <div className="text-slate-900">{formatDate(selectedUser.lastLogin)}</div>
                                   </div>
                                 )}
                               </div>
@@ -693,7 +693,7 @@ export function UserManagement({ user }: UserManagementProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-yellow-400 hover:text-yellow-300 hover:bg-white/10"
+                          className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
                           onClick={() => openEditDialog(userItem)}
                         >
                           <Edit className="h-4 w-4" />
@@ -701,7 +701,7 @@ export function UserManagement({ user }: UserManagementProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-green-400 hover:text-green-300 hover:bg-green-600/20"
+                          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                           onClick={() => toggleUserStatus(userItem.id)}
                         >
                           {userItem.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
@@ -709,7 +709,7 @@ export function UserManagement({ user }: UserManagementProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-400 hover:text-red-300 hover:bg-red-600/20"
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
                           onClick={() => deleteUser(userItem.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -723,10 +723,10 @@ export function UserManagement({ user }: UserManagementProps) {
           </div>
 
           {filteredUsers.length === 0 && (
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-blue-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">Kullanıcı Bulunamadı</h3>
-              <p className="text-blue-300">Arama kriterlerinize uygun kullanıcı bulunamadı.</p>
+            <div className="text-center py-8 bg-slate-50 border border-dashed border-slate-200 rounded-lg">
+              <Users className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-slate-900 mb-2">Kullanıcı Bulunamadı</h3>
+              <p className="text-slate-500">Arama kriterlerinize uygun kullanıcı bulunamadı.</p>
             </div>
           )}
         </CardContent>
@@ -734,43 +734,43 @@ export function UserManagement({ user }: UserManagementProps) {
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700/50 text-white max-w-md">
+        <DialogContent className="bg-white border border-slate-200 text-slate-900 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">Kullanıcı Düzenle</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-slate-900">Kullanıcı Düzenle</DialogTitle>
+            <DialogDescription className="text-slate-500">
               Kullanıcı bilgilerini güncelleyin
             </DialogDescription>
           </DialogHeader>
           {editingUser && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Ad Soyad</label>
+                <label className="text-sm font-medium text-slate-600">Ad Soyad</label>
                 <Input
                   value={editForm.name}
                   onChange={(e) => handleEditFormChange('name', e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500"
+                  className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-200"
                   placeholder="Ad soyad girin"
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">E-posta</label>
+                <label className="text-sm font-medium text-slate-600">E-posta</label>
                 <Input
                   value={editForm.email}
                   onChange={(e) => handleEditFormChange('email', e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500"
+                  className="bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-200"
                   placeholder="E-posta adresi"
                   type="email"
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">Rol</label>
+                <label className="text-sm font-medium text-slate-600">Rol</label>
                 <Select value={editForm.role} onValueChange={(value) => handleEditFormChange('role', value)}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white focus:border-blue-500 focus:ring-blue-500">
+                  <SelectTrigger className="bg-white border border-slate-200 text-slate-600 focus:border-blue-500 focus:ring-blue-200">
                     <SelectValue placeholder="Rol seçin" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-white/20">
+                  <SelectContent className="bg-white border border-slate-200">
                     <SelectItem value="STUDENT">Öğrenci</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
@@ -781,13 +781,13 @@ export function UserManagement({ user }: UserManagementProps) {
                 <Button
                   variant="outline"
                   onClick={closeEditDialog}
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  className="border-slate-200 text-slate-600 hover:bg-slate-100"
                 >
                   İptal
                 </Button>
                 <Button
                   onClick={saveUserChanges}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Kaydet
                 </Button>

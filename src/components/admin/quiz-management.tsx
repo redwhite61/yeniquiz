@@ -13,12 +13,23 @@ import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { Plus, Edit, Trash2, Clock, BookOpen, HelpCircle } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Category {
   id: string
   name: string
-  description?: string
-  color?: string
+  description?: string | null
+  color?: string | null
+  image?: string | null
 }
 
 interface Question {
@@ -72,6 +83,8 @@ export function QuizManagement({ user }: { user: any }) {
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const [deleteTarget, setDeleteTarget] = useState<Quiz | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const [formData, setFormData] = useState<QuizFormData>({
     title: '',
@@ -125,6 +138,11 @@ export function QuizManagement({ user }: { user: any }) {
     fetchQuestions()
     fetchQuizzes()
   }, [])
+
+  const totalQuizQuestions = quizzes.reduce((sum, quiz) => sum + quiz._count.questions, 0)
+  const totalAttempts = quizzes.reduce((sum, quiz) => sum + quiz._count.attempts, 0)
+  const averageQuestionCount = quizzes.length ? Math.round(totalQuizQuestions / quizzes.length) : 0
+  const categoryCoverage = new Set(quizzes.map((quiz) => quiz.category?.name)).size
 
   const handleInputChange = (field: keyof QuizFormData, value: any) => {
     setFormData(prev => ({
@@ -247,14 +265,11 @@ export function QuizManagement({ user }: { user: any }) {
     }
   }
 
-  const handleDelete = async (quizId: string) => {
-    if (!confirm('Bu testi silmek istediğinizden emin misiniz?')) {
-      return
-    }
-
-    setIsLoading(true)
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
     try {
-      const response = await fetch(`/api/quizzes/${quizId}`, {
+      const response = await fetch(`/api/quizzes/${deleteTarget.id}`, {
         method: 'DELETE',
       })
 
@@ -280,7 +295,8 @@ export function QuizManagement({ user }: { user: any }) {
         variant: 'destructive',
       })
     } finally {
-      setIsLoading(false)
+      setIsDeleting(false)
+      setDeleteTarget(null)
     }
   }
 
@@ -289,59 +305,60 @@ export function QuizManagement({ user }: { user: any }) {
   )
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-white">Test Yönetimi</h3>
-          <p className="text-sm text-slate-400">Testleri oluşturun, düzenleyin ve silin.</p>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-1">
+          <h3 className="text-2xl font-semibold text-slate-900">Test Yönetimi</h3>
+          <p className="text-sm text-slate-500">
+            Ölçme deneyimini yönetin, kapsamı genişletin ve takımı bilgilendirin.
+          </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={resetForm} className="shadow-sm">
+              <Plus className="mr-2 h-4 w-4" />
               Yeni Test
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-slate-800/95 backdrop-blur-xl border-slate-700/50">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto border border-slate-200 bg-white">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-xl font-semibold text-slate-900">
                 {editingQuiz ? 'Test Düzenle' : 'Yeni Test Oluştur'}
               </DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Test bilgilerini girin ve soruları seçin.
+              <DialogDescription className="text-sm text-slate-500">
+                Test bilgilerini girin, kategori seçin ve içerikleri ilişkilendirin.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <Alert variant="destructive" className="border-red-700/50 bg-red-900/20">
-                  <AlertDescription className="text-red-300">{error}</AlertDescription>
+                <Alert variant="destructive" className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-600">{error}</AlertDescription>
                 </Alert>
               )}
-              
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-slate-300">Test Başlığı *</Label>
+                  <Label htmlFor="title" className="text-slate-600">Test Başlığı *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
-                    placeholder="Test başlığını girin"
-                    className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                    placeholder="Örn. Genel Kültür Değerlendirmesi"
+                    className="border-slate-200 text-slate-900 placeholder-slate-400"
                   />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-slate-300">Kategori *</Label>
+                  <Label htmlFor="category" className="text-slate-600">Kategori *</Label>
                   <Select
                     value={formData.categoryId}
                     onValueChange={(value) => handleInputChange('categoryId', value)}
                   >
-                    <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                    <SelectTrigger className="border-slate-200 text-slate-900">
                       <SelectValue placeholder="Kategori seçin" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="border border-slate-200 bg-white">
                       {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id} className="text-white hover:bg-slate-700">
+                        <SelectItem key={category.id} value={category.id} className="text-slate-700 hover:bg-blue-50">
                           {category.name}
                         </SelectItem>
                       ))}
@@ -351,58 +368,66 @@ export function QuizManagement({ user }: { user: any }) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-slate-300">Açıklama</Label>
+                <Label htmlFor="description" className="text-slate-600">Açıklama</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Test açıklamasını girin"
+                  placeholder="Testin kapsamı ve beklentileri hakkında bilgi ekleyin"
                   rows={3}
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
+                  className="border-slate-200 text-slate-900 placeholder-slate-400"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="timeLimit" className="text-slate-300">Süre Limiti (dakika)</Label>
-                <Input
-                  id="timeLimit"
-                  type="number"
-                  min="1"
-                  value={formData.timeLimit || ''}
-                  onChange={(e) => handleInputChange('timeLimit', e.target.value ? parseInt(e.target.value) : undefined)}
-                  placeholder="Örn: 30"
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
-                />
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="timeLimit" className="text-slate-600">Süre Limiti (dakika)</Label>
+                  <Input
+                    id="timeLimit"
+                    type="number"
+                    min="1"
+                    value={formData.timeLimit || ''}
+                    onChange={(e) => handleInputChange('timeLimit', e.target.value ? parseInt(e.target.value) : undefined)}
+                    placeholder="Örn. 30"
+                    className="border-slate-200 text-slate-900 placeholder-slate-400"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-600">Testi öne çıkar</Label>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-500">
+                    Sınav süresi bırakıldığında adaylara süre baskısı oluşturur ve raporlamada görünür.
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-slate-300">Sorular</Label>
-                  <Badge variant="secondary" className="bg-blue-600/20 text-blue-300 border-blue-600/50">
+                  <Label className="text-slate-600">Sorular</Label>
+                  <Badge variant="secondary" className="rounded-full border-blue-100 bg-blue-50 text-blue-700">
                     {selectedQuestions.length} soru seçildi
                   </Badge>
                 </div>
-                
-                <div className="border border-slate-700/50 rounded-lg p-4 max-h-64 overflow-y-auto space-y-3 bg-slate-800/30">
+
+                <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
                   {filteredQuestions.length === 0 ? (
-                    <p className="text-center text-slate-400 py-4">
-                      {formData.categoryId ? 'Bu kategoride soru bulunmuyor' : 'Önce bir kategori seçin'}
-                    </p>
+                    <div className="py-6 text-center text-sm text-slate-500">
+                      {formData.categoryId ? 'Bu kategoride soru bulunmuyor' : 'Soruları görmek için kategori seçin'}
+                    </div>
                   ) : (
                     filteredQuestions.map((question) => (
-                      <div key={question.id} className="flex items-start space-x-3">
+                      <div key={question.id} className="flex items-start gap-3">
                         <Switch
                           checked={selectedQuestions.includes(question.id)}
                           onCheckedChange={(checked) => handleQuestionToggle(question.id, checked)}
                         />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{question.content}</p>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-slate-900">{question.content}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                            <Badge variant="outline" className="border-slate-200 text-slate-600">
                               {question.type === 'MULTIPLE_CHOICE' ? 'Çoktan Seçmeli' :
-                               question.type === 'TRUE_FALSE' ? 'Doğru/Yanlış' : 'Kısa Cevap'}
+                                question.type === 'TRUE_FALSE' ? 'Doğru/Yanlış' : 'Kısa Cevap'}
                             </Badge>
-                            <Badge variant="secondary" className="text-xs bg-slate-600/20 text-slate-300 border-slate-600/50">
+                            <Badge variant="secondary" className="border-blue-100 bg-blue-50 text-blue-700">
                               {question.category.name}
                             </Badge>
                           </div>
@@ -413,18 +438,18 @@ export function QuizManagement({ user }: { user: any }) {
                 </div>
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                   disabled={isLoading}
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                  className="border-slate-200 text-slate-600 hover:bg-slate-100"
                 >
                   İptal
                 </Button>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Kaydediliyor...' : (editingQuiz ? 'Güncelle' : 'Oluştur')}
+                  {isLoading ? 'Kaydediliyor...' : editingQuiz ? 'Güncelle' : 'Oluştur'}
                 </Button>
               </DialogFooter>
             </form>
@@ -432,77 +457,121 @@ export function QuizManagement({ user }: { user: any }) {
         </Dialog>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-none bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-xl">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-indigo-100">Toplam Test</CardDescription>
+            <CardTitle className="text-3xl font-semibold">{quizzes.length}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-indigo-100">
+            Platformda yayınlanan aktif testler.
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-500">Toplam Soru</CardDescription>
+            <CardTitle className="text-3xl font-semibold text-slate-900">{totalQuizQuestions}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-slate-500">
+            Testlere bağlı toplam soru adedi.
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 bg-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-500">Katılım</CardDescription>
+            <CardTitle className="text-3xl font-semibold text-slate-900">{totalAttempts}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-slate-500">
+            Tamamlanan deneme sayısı.
+          </CardContent>
+        </Card>
+        <Card className="border border-slate-200 bg-slate-900 text-white shadow-sm">
+          <CardHeader className="pb-2">
+            <CardDescription className="text-slate-300">Kapsam</CardDescription>
+            <CardTitle className="text-3xl font-semibold">{categoryCoverage}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 text-sm text-slate-300">
+            Kapsanan farklı kategori sayısı.
+          </CardContent>
+        </Card>
+      </div>
+
       {isLoading && !isDialogOpen ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500"></div>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4 lg:grid-cols-2">
           {quizzes.length === 0 ? (
-            <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50">
-              <CardContent className="text-center py-8">
-                <BookOpen className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2 text-white">Henüz test bulunmuyor</h3>
-                <p className="text-slate-400 mb-4">
-                  İlk testi oluşturmak için "Yeni Test" butonuna tıklayın.
+            <Card className="border border-dashed border-slate-300 bg-white text-center shadow-none">
+              <CardContent className="py-12">
+                <BookOpen className="mx-auto mb-4 h-12 w-12 text-slate-400" />
+                <h3 className="text-lg font-semibold text-slate-900">Henüz test bulunmuyor</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  İlk testi oluşturmak için "Yeni Test" butonunu kullanın.
                 </p>
               </CardContent>
             </Card>
           ) : (
             quizzes.map((quiz) => (
-              <Card key={quiz.id} className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <div
-                          className="w-3 h-3 rounded-full ring-2 ring-white/20"
-                          style={{ backgroundColor: quiz.category.color || '#3B82F6' }}
-                        />
-                        <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-600/50">{quiz.category.name}</Badge>
-                        {quiz.timeLimit && (
-                          <Badge variant="outline" className="border-orange-600/50 text-orange-300">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {quiz.timeLimit} dk
-                          </Badge>
-                        )}
-                      </div>
-                      <CardTitle className="text-lg text-white">{quiz.title}</CardTitle>
+              <Card
+                key={quiz.id}
+                className="relative overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-lg"
+              >
+                <div
+                  className="absolute inset-x-0 top-0 h-1"
+                  style={{ background: `linear-gradient(90deg, ${quiz.category.color || '#2563eb'} 0%, rgba(15,23,42,0.08) 100%)` }}
+                />
+                <CardHeader className="space-y-4">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="rounded-full border-blue-100 bg-blue-50 text-blue-700">
+                        {quiz.category.name}
+                      </Badge>
+                      {quiz.timeLimit && (
+                        <Badge variant="outline" className="flex items-center gap-1 border-amber-200 text-amber-600">
+                          <Clock className="h-3 w-3" />
+                          {quiz.timeLimit} dk
+                        </Badge>
+                      )}
+                      <Badge variant="secondary" className="rounded-full border-slate-200 bg-white text-slate-600">
+                        Ortalama {averageQuestionCount} soru
+                      </Badge>
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-slate-900">{quiz.title}</CardTitle>
                       {quiz.description && (
-                        <CardDescription className="text-slate-400">{quiz.description}</CardDescription>
+                        <CardDescription className="mt-1 text-sm text-slate-500">{quiz.description}</CardDescription>
                       )}
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(quiz)}
-                        className="border-slate-600 text-slate-300 hover:bg-blue-600/20 hover:text-blue-300 hover:border-blue-600/50 transition-all duration-200"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(quiz.id)}
-                        disabled={isLoading}
-                        className="border-slate-600 text-slate-300 hover:bg-red-600/20 hover:text-red-300 hover:border-red-600/50 transition-all duration-200"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(quiz)}
+                      className="border-slate-200 text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeleteTarget(quiz)}
+                      className="border-slate-200 text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-6 text-sm text-slate-400">
-                    <div className="flex items-center space-x-1">
-                      <HelpCircle className="h-4 w-4 text-green-400" />
-                      <span>{quiz._count.questions} soru</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <BookOpen className="h-4 w-4 text-blue-400" />
-                      <span>{quiz._count.attempts} çözüm</span>
-                    </div>
+                <CardContent className="flex flex-wrap gap-6 text-sm text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <HelpCircle className="h-4 w-4 text-emerald-500" />
+                    <span>{quiz._count.questions} soru</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-blue-500" />
+                    <span>{quiz._count.attempts} çözüm</span>
                   </div>
                 </CardContent>
               </Card>
@@ -510,6 +579,34 @@ export function QuizManagement({ user }: { user: any }) {
           )}
         </div>
       )}
+
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setDeleteTarget(null)
+          }
+        }}
+      >
+        <AlertDialogContent className="border border-slate-200 bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Testi silmek üzeresiniz</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{deleteTarget?.title}" testini kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Vazgeç</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Siliniyor...' : 'Evet, sil'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

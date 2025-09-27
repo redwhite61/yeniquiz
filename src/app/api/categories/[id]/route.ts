@@ -43,7 +43,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const { name, description, color } = await request.json()
+    const { name, description, color, image } = await request.json()
 
     if (!name) {
       return NextResponse.json(
@@ -57,7 +57,8 @@ export async function PUT(
       data: {
         name,
         description,
-        color: color || '#3B82F6'
+        color: color || '#3B82F6',
+        image: image || null
       }
     })
 

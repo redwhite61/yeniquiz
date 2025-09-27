@@ -146,14 +146,7 @@ export async function DELETE(
 
     // Check if quiz exists
     const existingQuiz = await db.quiz.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: {
-            attempts: true
-          }
-        }
-      }
+      where: { id }
     })
 
     if (!existingQuiz) {
@@ -163,23 +156,24 @@ export async function DELETE(
       )
     }
 
-    // Check if quiz has attempts
-    if (existingQuiz._count.attempts > 0) {
-      return NextResponse.json(
-        { error: 'Bu testi silmek için önce tüm çözümlerin silinmesi gerekir' },
-        { status: 400 }
-      )
-    }
-
-    // Delete quiz questions first
-    await db.quizQuestion.deleteMany({
-      where: { quizId: id }
-    })
-
-    // Delete quiz
-    await db.quiz.delete({
-      where: { id }
-    })
+    await db.$transaction([
+      db.answer.deleteMany({
+        where: {
+          quizAttempt: {
+            quizId: id
+          }
+        }
+      }),
+      db.quizAttempt.deleteMany({
+        where: { quizId: id }
+      }),
+      db.quizQuestion.deleteMany({
+        where: { quizId: id }
+      }),
+      db.quiz.delete({
+        where: { id }
+      })
+    ])
 
     return NextResponse.json({
       message: 'Test başarıyla silindi'

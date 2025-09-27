@@ -5,8 +5,8 @@ import { useAuth } from '@/contexts/auth-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import { AnnouncementManagement } from '@/components/admin/announcement-management'
 import { CategoryManagement } from '@/components/admin/category-management'
 import { QuestionManagement } from '@/components/admin/question-management'
 import { QuizManagement } from '@/components/admin/quiz-management'
@@ -27,7 +27,8 @@ import {
   LayoutDashboard,
   Database,
   FileText,
-  Users as UsersIcon
+  Users as UsersIcon,
+  Megaphone
 } from 'lucide-react'
 
 export default function AdminPage() {
@@ -68,24 +69,24 @@ export default function AdminPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500"></div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-slate-200 border-t-blue-500"></div>
       </div>
     )
   }
 
   if (!user || user.role !== 'ADMIN') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border-white/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-red-400">Erişim Engellendi</CardTitle>
-            <CardDescription className="text-purple-300">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <Card className="w-full max-w-md border border-slate-200 shadow-lg">
+          <CardHeader className="text-center space-y-2">
+            <CardTitle className="text-2xl font-semibold text-slate-900">Erişim Engellendi</CardTitle>
+            <CardDescription className="text-slate-600">
               Bu sayfaya sadece admin kullanıcılar erişebilir.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => window.location.href = '/'} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">
+            <Button onClick={() => window.location.href = '/'} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
               Ana Sayfaya Dön
             </Button>
           </CardContent>
@@ -95,9 +96,9 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Top Navbar */}
-      <header className="bg-black/30 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+      <header className="sticky top-0 z-50 bg-white/90 supports-[backdrop-filter]:bg-white/70 backdrop-blur border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left Side - Logo and Mobile Menu */}
@@ -105,92 +106,89 @@ export default function AdminPage() {
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <button
-                    className="md:hidden inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 size-9 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 text-white hover:bg-white/10"
+                    className="md:hidden inline-flex items-center justify-center rounded-full text-slate-600 hover:text-blue-600 hover:bg-blue-50 size-10 transition-colors"
                   >
                     <Menu className="h-6 w-6" />
                   </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-80 bg-slate-900 border-white/10 p-0">
+                <SheetContent side="left" className="w-80 bg-white border-r border-slate-200 p-0">
                   <SheetTitle className="sr-only">Admin Mobil Menü</SheetTitle>
                   <div className="flex flex-col h-full">
                     {/* Sidebar Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-white/10">
+                    <div className="flex items-center justify-between p-6 border-b border-slate-200">
                       <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full blur-sm opacity-75"></div>
-                          <div className="relative bg-gradient-to-r from-blue-600 to-cyan-600 p-2 rounded-full">
-                            <Settings className="h-6 w-6 text-white" />
-                          </div>
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-inner">
+                          <Settings className="h-5 w-5" />
                         </div>
                         <div>
-                          <h1 className="text-xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                            Admin Panel
-                          </h1>
-                          <p className="text-xs text-blue-300">Yönetim Paneli</p>
+                          <h1 className="text-xl font-semibold text-slate-900">Admin Panel</h1>
+                          <p className="text-xs text-slate-500">Yönetim Paneli</p>
                         </div>
                       </div>
+                      <button
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="inline-flex items-center justify-center rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 size-9"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
                     </div>
 
                     {/* User Info */}
-                    <div className="p-6 border-b border-white/10">
+                    <div className="p-6 border-b border-slate-200">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <div className="w-2 h-2 bg-green-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
-                          <User className="h-8 w-8 text-blue-200" />
+                          <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
+                          <User className="h-8 w-8 text-blue-500" />
                         </div>
                         <div className="flex-1">
-                          <div className="text-white font-medium truncate">{user.name || user.email}</div>
-                          <Badge variant="secondary" className="text-xs bg-blue-600 text-white border-blue-500">
-                            Admin
-                          </Badge>
+                          <div className="font-medium text-slate-900 truncate">{user.name || user.email}</div>
                         </div>
                       </div>
                     </div>
 
                     {/* Navigation Menu */}
-                    <nav className="flex-1 p-6 space-y-2">
+                    <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
                       <button
-                        className="w-full justify-start text-white hover:bg-white/10 hover:text-white inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                        className="w-full justify-start text-slate-600 hover:text-blue-600 hover:bg-blue-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                         onClick={() => {
                           window.location.href = '/'
                           setMobileMenuOpen(false)
                         }}
                       >
-                        <Home className="h-5 w-5 mr-3" />
+                        <Home className="h-5 w-5" />
                         Ana Sayfa
                       </button>
-                      
+
                       <button
-                        className="w-full justify-start text-white hover:bg-white/10 hover:text-white inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                        className="w-full justify-start text-slate-600 hover:text-blue-600 hover:bg-blue-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                         onClick={() => {
                           window.location.href = '/leaderboard'
                           setMobileMenuOpen(false)
                         }}
                       >
-                        <Trophy className="h-5 w-5 mr-3" />
+                        <Trophy className="h-5 w-5" />
                         Liderlik Tablosu
                       </button>
 
                       <button
-                        className="w-full justify-start text-white hover:bg-white/10 hover:text-white inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                        className="w-full justify-start text-slate-600 hover:text-blue-600 hover:bg-blue-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                         onClick={() => {
                           window.location.href = '/profile'
                           setMobileMenuOpen(false)
                         }}
                       >
-                        <User className="h-5 w-5 mr-3" />
+                        <User className="h-5 w-5" />
                         Profilim
                       </button>
 
-                      <div className="border-t border-white/10 pt-4 mt-4">
+                      <div className="border-t border-slate-200 pt-4 mt-4">
                         <button
-                          className="w-full justify-start text-red-400 hover:bg-red-500/10 hover:text-red-400 inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                           onClick={() => {
-                            // logout function would go here
                             setMobileMenuOpen(false)
                           }}
                         >
-                          <LogOut className="h-5 w-5 mr-3" />
+                          <LogOut className="h-5 w-5" />
                           Çıkış Yap
                         </button>
                       </div>
@@ -199,58 +197,50 @@ export default function AdminPage() {
                 </SheetContent>
               </Sheet>
               <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full blur-sm opacity-75"></div>
-                  <div className="relative bg-gradient-to-r from-blue-600 to-cyan-600 p-2 rounded-full">
-                    <Settings className="h-6 w-6 text-white" />
-                  </div>
+                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-inner">
+                  <Settings className="h-5 w-5" />
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-                    Admin Panel
-                  </h1>
-                  <p className="text-xs text-blue-300 -mt-1">Yönetim Paneli</p>
+                  <h1 className="text-2xl font-semibold text-slate-900">Admin Panel</h1>
+                  <p className="text-xs text-slate-500 -mt-0.5">Yönetim Paneli</p>
                 </div>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
+            <div className="hidden md:flex items-center space-x-3">
+              <div className="flex items-center space-x-3 bg-white border border-slate-200 rounded-full px-4 py-2 shadow-sm">
                 <div className="relative">
-                  <div className="w-2 h-2 bg-green-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
-                  <User className="h-5 w-5 text-blue-200" />
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
+                  <User className="h-5 w-5 text-slate-500" />
                 </div>
                 <div className="text-sm">
-                  <span className="text-white font-medium">{user.name || user.email}</span>
-                  <Badge variant="secondary" className="ml-2 text-xs bg-blue-600 text-white border-blue-500">
-                    Admin
-                  </Badge>
+                  <span className="font-medium text-slate-900">{user.name || user.email}</span>
                 </div>
               </div>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 onClick={() => window.location.href = '/'}
-                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all duration-200 bg-white/5"
+                className="rounded-full border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
               >
                 <Home className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Ana Sayfa</span>
               </Button>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 onClick={() => window.location.href = '/leaderboard'}
-                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all duration-200 bg-white/5"
+                className="rounded-full border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
               >
                 <Trophy className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Liderlik</span>
               </Button>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 onClick={() => window.location.href = '/profile'}
-                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 transition-all duration-200 bg-white/5"
+                className="rounded-full border-slate-200 text-slate-700 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50"
               >
                 <User className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Profil</span>
@@ -262,50 +252,47 @@ export default function AdminPage() {
               <Sheet>
                 <SheetTrigger asChild>
                   <button
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 size-9 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 text-white hover:bg-white/10"
+                    className="inline-flex items-center justify-center rounded-full text-slate-600 hover:text-blue-600 hover:bg-blue-50 size-10"
                   >
                     <div className="relative">
-                      <div className="w-2 h-2 bg-green-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
                       <User className="h-5 w-5" />
                     </div>
                   </button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-80 bg-slate-900 border-white/10">
+                <SheetContent side="right" className="w-80 bg-white border-l border-slate-200">
                   <SheetTitle className="sr-only">Kullanıcı Menüsü</SheetTitle>
                   <div className="flex flex-col space-y-6">
                     <div className="text-center">
                       <div className="relative inline-block">
-                        <div className="w-2 h-2 bg-green-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
-                        <User className="h-12 w-12 text-blue-200 mx-auto mb-3" />
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full absolute top-0 right-0 ring-2 ring-white"></div>
+                        <User className="h-12 w-12 text-blue-500 mx-auto mb-3" />
                       </div>
-                      <h3 className="text-lg font-semibold text-white">{user.name || user.email}</h3>
-                      <Badge variant="secondary" className="mt-2 bg-blue-600 text-white border-blue-500">
-                        Admin
-                      </Badge>
+                      <h3 className="text-lg font-semibold text-slate-900">{user.name || user.email}</h3>
                     </div>
 
                     <nav className="space-y-2">
                       <button
-                        className="w-full justify-start text-white hover:bg-white/10 inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                        className="w-full justify-start text-slate-600 hover:text-blue-600 hover:bg-blue-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                         onClick={() => window.location.href = '/profile'}
                       >
-                        <User className="h-5 w-5 mr-3" />
+                        <User className="h-5 w-5" />
                         Profilim
                       </button>
-                      
+
                       <button
-                        className="w-full justify-start text-white hover:bg-white/10 inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                        className="w-full justify-start text-slate-600 hover:text-blue-600 hover:bg-blue-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                         onClick={() => window.location.href = '/leaderboard'}
                       >
-                        <Trophy className="h-5 w-5 mr-3" />
+                        <Trophy className="h-5 w-5" />
                         Liderlik Tablosu
                       </button>
 
                       <button
-                        className="w-full justify-start text-white hover:bg-white/10 inline-flex items-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive px-4 py-2 has-[>svg]:px-3 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                        className="w-full justify-start text-slate-600 hover:text-blue-600 hover:bg-blue-50 inline-flex items-center gap-2 rounded-lg text-sm font-medium transition-all px-4 py-2"
                         onClick={() => window.location.href = '/'}
                       >
-                        <Home className="h-5 w-5 mr-3" />
+                        <Home className="h-5 w-5" />
                         Ana Sayfa
                       </button>
                     </nav>
@@ -319,72 +306,72 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 text-center sm:text-left">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">Admin Paneli</h2>
-          <p className="text-lg text-blue-300 max-w-2xl mx-auto sm:mx-0">
-            Platformu yönetin ve içerik ekleyin.
+        <div className="mb-10 text-center sm:text-left">
+          <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 mb-2">Admin Paneli</h2>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto sm:mx-0">
+            Platformu kolayca yönetin, içerik oluşturun ve performansı takip edin.
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-300">Toplam Kullanıcı</CardTitle>
-              <div className="p-2 bg-blue-600/20 rounded-lg">
-                <UsersIcon className="h-4 w-4 text-blue-400" />
+              <CardTitle className="text-sm font-medium text-slate-500">Toplam Kullanıcı</CardTitle>
+              <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
+                <UsersIcon className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <div className="text-2xl font-semibold text-slate-900">
                 {isLoading ? '-' : stats.totalUsers}
               </div>
-              <p className="text-xs text-slate-400">Kayıtlı kullanıcı</p>
+              <p className="text-xs text-slate-500">Kayıtlı kullanıcı</p>
             </CardContent>
           </Card>
-          
-          <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+
+          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-300">Kategoriler</CardTitle>
-              <div className="p-2 bg-purple-600/20 rounded-lg">
-                <BookOpen className="h-4 w-4 text-purple-400" />
+              <CardTitle className="text-sm font-medium text-slate-500">Kategoriler</CardTitle>
+              <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+                <BookOpen className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <div className="text-2xl font-semibold text-slate-900">
                 {isLoading ? '-' : stats.totalCategories}
               </div>
-              <p className="text-xs text-slate-400">Aktif kategori</p>
+              <p className="text-xs text-slate-500">Aktif kategori</p>
             </CardContent>
           </Card>
-          
-          <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+
+          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-300">Sorular</CardTitle>
-              <div className="p-2 bg-green-600/20 rounded-lg">
-                <HelpCircle className="h-4 w-4 text-green-400" />
+              <CardTitle className="text-sm font-medium text-slate-500">Sorular</CardTitle>
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                <HelpCircle className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+              <div className="text-2xl font-semibold text-slate-900">
                 {isLoading ? '-' : stats.totalQuestions}
               </div>
-              <p className="text-xs text-slate-400">Toplam soru</p>
+              <p className="text-xs text-slate-500">Toplam soru</p>
             </CardContent>
           </Card>
-          
-          <Card className="bg-slate-800/50 backdrop-blur-xl border-slate-700/50 hover:bg-slate-800/70 hover:border-slate-600/50 transition-all duration-300 shadow-lg hover:shadow-xl">
+
+          <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-300">Testler</CardTitle>
-              <div className="p-2 bg-orange-600/20 rounded-lg">
-                <FileText className="h-4 w-4 text-orange-400" />
+              <CardTitle className="text-sm font-medium text-slate-500">Testler</CardTitle>
+              <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
+                <FileText className="h-4 w-4" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+              <div className="text-2xl font-semibold text-slate-900">
                 {isLoading ? '-' : stats.totalQuizzes}
               </div>
-              <p className="text-xs text-slate-400">Aktif test</p>
+              <p className="text-xs text-slate-500">Aktif test</p>
             </CardContent>
           </Card>
         </div>
@@ -392,29 +379,36 @@ export default function AdminPage() {
         {/* Management Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="grid w-full grid-cols-4 min-w-max bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg p-1">
-              <TabsTrigger value="categories" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 rounded-md">
+            <TabsList className="grid w-full grid-cols-5 min-w-max bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+              <TabsTrigger value="categories" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
                 <div className="flex items-center space-x-2">
                   <Database className="h-4 w-4" />
                   <span className="hidden sm:inline">Kategoriler</span>
                   <span className="sm:hidden">Kat</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="questions" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 rounded-md">
+              <TabsTrigger value="questions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
                 <div className="flex items-center space-x-2">
                   <HelpCircle className="h-4 w-4" />
                   <span className="hidden sm:inline">Sorular</span>
                   <span className="sm:hidden">Sor</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="quizzes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 rounded-md">
+              <TabsTrigger value="quizzes" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4" />
                   <span className="hidden sm:inline">Testler</span>
                   <span className="sm:hidden">Test</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="users" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 rounded-md">
+              <TabsTrigger value="announcements" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
+                <div className="flex items-center space-x-2">
+                  <Megaphone className="h-4 w-4" />
+                  <span className="hidden sm:inline">Duyurular</span>
+                  <span className="sm:hidden">Duy</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all">
                 <div className="flex items-center space-x-2">
                   <UsersIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Kullanıcılar</span>
@@ -436,6 +430,10 @@ export default function AdminPage() {
             <QuizManagement user={user} />
           </TabsContent>
 
+          <TabsContent value="announcements" className="space-y-6">
+            <AnnouncementManagement />
+          </TabsContent>
+
           <TabsContent value="users" className="space-y-6">
             <UserManagement user={user} />
           </TabsContent>
@@ -443,10 +441,10 @@ export default function AdminPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-black/30 backdrop-blur-xl border-t border-white/10 py-8 mt-16">
+      <footer className="bg-white border-t border-slate-200 py-8 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-blue-300">
+            <p className="text-slate-500">
               © 2024 QuizMaster Admin Panel. Tüm hakları saklıdır.
             </p>
           </div>

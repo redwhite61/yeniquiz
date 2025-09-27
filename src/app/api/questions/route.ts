@@ -68,33 +68,43 @@ export async function POST(request: NextRequest) {
   try {
     const { content, type, options, correctAnswer, imageUrl, points, difficulty, categoryId } = await request.json()
 
-    if (!content || !categoryId || !correctAnswer) {
+    if (!content || !categoryId || (!correctAnswer && correctAnswer !== 0 && correctAnswer !== '0')) {
       return NextResponse.json(
         { error: 'İçerik, kategori ve doğru cevap gereklidir' },
         { status: 400 }
       )
     }
 
-    // Validate options for multiple choice and true/false questions
-    if ((type === 'MULTIPLE_CHOICE' || type === 'TRUE_FALSE') && (!options || !Array.isArray(options) || options.length === 0)) {
-      return NextResponse.json(
-        { error: 'Çoktan seçmeli ve doğru/yanlış sorular için seçenekler gereklidir' },
-        { status: 400 }
-      )
-    }
-
-    // Validate image URL for IMAGE type questions
-    if (type === 'IMAGE' && !imageUrl) {
-      return NextResponse.json(
-        { error: 'Resimli sorular için lütfen bir resim yükleyin. Resim yüklemeden soruyu kaydedemezsiniz.' },
-        { status: 400 }
-      )
-    }
-
     // Convert options to the new format if needed
-    const formattedOptions = options ? options.map(opt => 
+    const formattedOptions = options ? options.map(opt =>
       typeof opt === 'string' ? { text: opt, imageUrl: '' } : opt
     ) : []
+
+    const requiresOptions = type === 'MULTIPLE_CHOICE' || type === 'TRUE_FALSE' || type === 'IMAGE'
+    if (requiresOptions) {
+      if (!Array.isArray(options) || formattedOptions.length === 0) {
+        return NextResponse.json(
+          { error: 'Bu soru tipi için en az bir seçenek eklemelisiniz.' },
+          { status: 400 }
+        )
+      }
+
+      const invalidOption = formattedOptions.some((opt) => !opt.text || !opt.text.trim() || !opt.imageUrl || !String(opt.imageUrl).trim())
+      if (invalidOption) {
+        return NextResponse.json(
+          { error: 'Her seçenek için metin ve görsel eklemelisiniz.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    const requiresQuestionImage = type !== 'TEXT'
+    if (requiresQuestionImage && (!imageUrl || !String(imageUrl).trim())) {
+      return NextResponse.json(
+        { error: 'Bu soru tipi için bir soru görseli yüklemelisiniz.' },
+        { status: 400 }
+      )
+    }
 
     const question = await db.question.create({
       data: {

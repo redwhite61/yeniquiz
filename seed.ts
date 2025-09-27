@@ -28,6 +28,19 @@ async function main() {
     }
   })
 
+  await db.announcement.upsert({
+    where: { id: 'default-announcement' },
+    update: {},
+    create: {
+      id: 'default-announcement',
+      title: 'QuizMaster Platform Güncellemeleri',
+      content:
+        'Yeni nesil öğrenme deneyimi için platformu sürekli geliştiriyoruz. Gelişmiş raporlama, canlı liderlik takibi ve kişiselleştirilmiş sınav akışları artık hazır.',
+      icon: '📢',
+      date: new Date()
+    }
+  })
+
   // Create categories
   const categories = await Promise.all([
     db.category.upsert({

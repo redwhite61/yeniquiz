@@ -76,25 +76,43 @@ export async function PUT(
     const { id } = await params
     const { content, type, options, correctAnswer, imageUrl, points, difficulty, categoryId } = await request.json()
 
-    if (!content || !categoryId) {
+    if (!content || !categoryId || (!correctAnswer && correctAnswer !== 0 && correctAnswer !== '0')) {
       return NextResponse.json(
-        { error: 'Soru içeriği ve kategori gereklidir' },
-        { status: 400 }
-      )
-    }
-
-    // Validate image URL for IMAGE type questions
-    if (type === 'IMAGE' && !imageUrl) {
-      return NextResponse.json(
-        { error: 'Resimli sorular için resim URL gereklidir' },
+        { error: 'Soru içeriği, kategori ve doğru cevap gereklidir' },
         { status: 400 }
       )
     }
 
     // Convert options to the new format if needed
-    const formattedOptions = options ? options.map(opt => 
+    const formattedOptions = options ? options.map(opt =>
       typeof opt === 'string' ? { text: opt, imageUrl: '' } : opt
     ) : []
+
+    const requiresOptions = type === 'MULTIPLE_CHOICE' || type === 'TRUE_FALSE' || type === 'IMAGE'
+    if (requiresOptions) {
+      if (!Array.isArray(options) || formattedOptions.length === 0) {
+        return NextResponse.json(
+          { error: 'Bu soru tipi için en az bir seçenek eklemelisiniz.' },
+          { status: 400 }
+        )
+      }
+
+      const invalidOption = formattedOptions.some((opt) => !opt.text || !opt.text.trim() || !opt.imageUrl || !String(opt.imageUrl).trim())
+      if (invalidOption) {
+        return NextResponse.json(
+          { error: 'Her seçenek için metin ve görsel eklemelisiniz.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    const requiresQuestionImage = type !== 'TEXT'
+    if (requiresQuestionImage && (!imageUrl || !String(imageUrl).trim())) {
+      return NextResponse.json(
+        { error: 'Bu soru tipi için bir soru görseli yüklemelisiniz.' },
+        { status: 400 }
+      )
+    }
 
     const question = await db.question.update({
       where: { id },
@@ -102,7 +120,7 @@ export async function PUT(
         content,
         type,
         options: formattedOptions.length > 0 ? JSON.stringify(formattedOptions) : null,
-        correctAnswer,
+        correctAnswer: correctAnswer.toString(),
         imageUrl: imageUrl || null,
         points: points || 1,
         difficulty,

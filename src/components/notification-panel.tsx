@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
 import { useSocket } from '@/hooks/use-socket'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Bell, X, Trophy, TrendingUp, BookOpen, Check, CheckAll } from 'lucide-react'
+import { Bell, BookOpen, DollarSign, Info, Trophy, UserPlus, X } from 'lucide-react'
 
 interface NotificationPanelProps {
   isOpen: boolean
@@ -15,40 +15,46 @@ interface NotificationPanelProps {
 export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
   const {
     notifications,
-    leaderboardUpdates,
     unreadNotificationsCount,
-    markNotificationAsRead,
     markAllNotificationsAsRead,
-    clearNotifications
+    markNotificationAsRead
   } = useSocket()
 
-  const [activeTab, setActiveTab] = useState<'notifications' | 'live'>('notifications')
+  const [isMounted, setIsMounted] = useState(isOpen)
+  const [animateIn, setAnimateIn] = useState(false)
 
-  if (!isOpen) return null
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'RANK_CHANGE':
-        return <TrendingUp className="h-4 w-4 text-blue-400" />
-      case 'TEST_COMPLETED':
-        return <BookOpen className="h-4 w-4 text-green-400" />
-      case 'NEW_TEST':
-        return <BookOpen className="h-4 w-4 text-purple-400" />
-      default:
-        return <Bell className="h-4 w-4 text-gray-400" />
+  useEffect(() => {
+    if (isOpen) {
+      setIsMounted(true)
+      const id = requestAnimationFrame(() => setAnimateIn(true))
+      return () => cancelAnimationFrame(id)
     }
+
+    setAnimateIn(false)
+
+    const timeout = setTimeout(() => setIsMounted(false), 250)
+    return () => clearTimeout(timeout)
+  }, [isOpen])
+
+  if (!isMounted) {
+    return null
   }
 
-  const getNotificationColor = (type: string) => {
+  const iconForNotification = (type: string) => {
     switch (type) {
       case 'RANK_CHANGE':
-        return 'border-blue-500/30 bg-blue-500/10'
+      case 'ACHIEVEMENT':
+        return <Trophy className="h-5 w-5 text-amber-500" />
       case 'TEST_COMPLETED':
-        return 'border-green-500/30 bg-green-500/10'
       case 'NEW_TEST':
-        return 'border-purple-500/30 bg-purple-500/10'
+        return <BookOpen className="h-5 w-5 text-indigo-500" />
+      case 'BONUS':
+      case 'REWARD':
+        return <DollarSign className="h-5 w-5 text-emerald-500" />
+      case 'NEW_FOLLOWER':
+        return <UserPlus className="h-5 w-5 text-blue-500" />
       default:
-        return 'border-gray-500/30 bg-gray-500/10'
+        return <Info className="h-5 w-5 text-slate-400" />
     }
   }
 
@@ -60,175 +66,128 @@ export function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Az önce'
-    if (diffMins < 60) return `${diffMins} dakika önce`
-    if (diffHours < 24) return `${diffHours} saat önce`
-    if (diffDays < 7) return `${diffDays} gün önce`
+    if (diffMins < 1) return 'Şimdi'
+    if (diffMins < 60) return `${diffMins}dk önce`
+    if (diffHours < 24) return `${diffHours}s önce`
+    if (diffDays < 7) return `${diffDays}g önce`
     return date.toLocaleDateString('tr-TR')
   }
 
+  const unreadNotifications = notifications.filter((notification) => !notification.read)
+  const readNotifications = notifications.filter((notification) => notification.read)
+
+  const renderNotificationGroup = (
+    title: string,
+    items: typeof unreadNotifications
+  ) => (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</p>
+      <div className="space-y-3">
+        {items.map((notification) => {
+          const heading = (notification as { title?: string }).title ?? notification.message
+          const detailText =
+            (notification as {
+              description?: string
+              details?: string
+              body?: string
+              subtitle?: string
+            }).description ??
+            (notification as { details?: string }).details ??
+            (notification as { body?: string }).body ??
+            (notification as { subtitle?: string }).subtitle ??
+            ''
+
+          return (
+            <button
+              key={notification.id}
+              onClick={() => !notification.read && markNotificationAsRead(notification.id)}
+              className={`w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 ${
+                notification.read ? '' : 'ring-1 ring-blue-100'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
+                    {iconForNotification(notification.type)}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-900">{heading}</p>
+                    <p className="text-xs text-slate-500">
+                      {detailText || notification.message}
+                    </p>
+                  </div>
+                </div>
+                <span className="whitespace-nowrap text-xs font-medium text-slate-400">
+                  {formatTime(notification.timestamp)}
+                </span>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+
   return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+    <div className="fixed inset-0 z-[9999] flex justify-end">
+      <div
+        className="absolute inset-0 bg-slate-900/30 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      
-      {/* Notification Panel */}
-      <div className="fixed top-4 right-4 w-96 max-h-[80vh] bg-slate-900 border border-white/20 rounded-xl shadow-2xl z-[9999] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <div className="flex items-center space-x-2">
-            <Bell className="h-5 w-5 text-purple-400" />
-            <h2 className="text-lg font-semibold text-white">Bildirimler</h2>
+
+      <aside
+        className={`relative flex h-full w-full max-w-md flex-col bg-white p-6 shadow-2xl transition-all duration-300 ease-out sm:rounded-l-3xl sm:border-l sm:border-slate-200 ${
+          animateIn ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-blue-500" />
+            <h2 className="text-lg font-semibold text-slate-900">Notifications</h2>
             {unreadNotificationsCount > 0 && (
-              <Badge variant="secondary" className="bg-red-600 text-white text-xs">
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
                 {unreadNotificationsCount}
-              </Badge>
+              </span>
             )}
           </div>
-          <div className="flex items-center space-x-2">
-            {unreadNotificationsCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={markAllNotificationsAsRead}
-                className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-              >
-                <CheckAll className="h-4 w-4" />
-              </Button>
-            )}
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              type="button"
               size="sm"
-              onClick={clearNotifications}
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              variant="ghost"
+              disabled={unreadNotificationsCount === 0}
+              onClick={markAllNotificationsAsRead}
+              className="text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:text-slate-300"
             >
-              Temizle
+              Mark all read
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-white hover:bg-white/10"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-slate-200 hover:text-slate-600"
             >
-              <X className="h-4 w-4" />
-            </Button>
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-white/10">
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'notifications'
-                ? 'text-purple-400 border-b-2 border-purple-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Bildirimler
-            {unreadNotificationsCount > 0 && (
-              <Badge variant="secondary" className="ml-2 bg-red-600 text-white text-xs">
-                {unreadNotificationsCount}
-              </Badge>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('live')}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'live'
-                ? 'text-purple-400 border-b-2 border-purple-400'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Canlı Güncellemeler
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          {activeTab === 'notifications' ? (
-            <div className="p-4 space-y-3">
-              {notifications.length === 0 ? (
-                <div className="text-center py-8">
-                  <Bell className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">Henüz bildirim yok</p>
-                </div>
-              ) : (
-                notifications.map((notification) => (
-                  <Card
-                    key={notification.id}
-                    className={`p-3 ${getNotificationColor(notification.type)} backdrop-blur-sm border ${
-                      !notification.read ? 'shadow-lg' : ''
-                    }`}
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className={`text-sm ${!notification.read ? 'text-white font-medium' : 'text-gray-300'}`}>
-                            {notification.message}
-                          </p>
-                          {!notification.read && (
-                            <div className="w-2 h-2 bg-purple-400 rounded-full flex-shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {formatTime(notification.timestamp)}
-                        </p>
-                      </div>
-                      {!notification.read && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => markNotificationAsRead(notification.id)}
-                          className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 p-1 h-auto"
-                        >
-                          <Check className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </Card>
-                ))
-              )}
+        <div className="mt-6 flex-1 space-y-6 overflow-y-auto pr-2">
+          {notifications.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center text-center text-slate-500">
+              <Bell className="mb-4 h-10 w-10 text-slate-300" />
+              <p className="text-sm font-medium">Hiç bildirim yok</p>
+              <p className="text-xs">Yeni haberler burada görünecek.</p>
             </div>
           ) : (
-            <div className="p-4 space-y-3">
-              {leaderboardUpdates.length === 0 ? (
-                <div className="text-center py-8">
-                  <Trophy className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400">Henüz canlı güncelleme yok</p>
-                </div>
-              ) : (
-                leaderboardUpdates.map((update, index) => (
-                  <Card
-                    key={`${update.timestamp}_${index}`}
-                    className="p-3 border-purple-500/30 bg-purple-500/10 backdrop-blur-sm"
-                  >
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 mt-0.5">
-                        <Trophy className="h-4 w-4 text-purple-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white font-medium">
-                          {update.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {formatTime(update.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                ))
-              )}
-            </div>
+            <>
+              {unreadNotifications.length > 0 &&
+                renderNotificationGroup('New', unreadNotifications)}
+              {readNotifications.length > 0 &&
+                renderNotificationGroup('Earlier', readNotifications)}
+            </>
           )}
         </div>
-      </div>
-    </>
+      </aside>
+    </div>
   )
 }
